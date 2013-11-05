@@ -1,5 +1,7 @@
 package fm.knight.chesster;
 
+import fm.knight.chesster.model.Piece;
+import fm.knight.chesster.model.Board;
 
 import android.content.Context;
 import android.graphics.Canvas;
