@@ -2,19 +2,24 @@ package fm.knight.chesster.model;
 
 public class Move {
 
- private final Position fromPosition;
- private final Position toPosition;
-	
-    public Move(Position fromPosition, Position toPosition) {
-	this.toPosition = toPosition;
-	this.fromPosition = fromPosition;	
+  private final Coordinate fromCoordinate;
+  private final Coordinate toCoordinate;
+  private final Piece takenPiece;
+  public Move(Coordinate fromCoordinate, Coordinate toCoordinate, Piece takenPiece) {
+    this.toCoordinate = toCoordinate;
+    this.fromCoordinate = fromCoordinate;
+    this.takenPiece = takenPiece;
   }
 
-    public Position getFromPosition() {
-	return fromPosition;
-    }
+  public Coordinate getFromCoordinate() {
+    return fromCoordinate;
+  }
 
-    public Position getToPosition() {
-	return toPosition;
-    }
+  public Coordinate getToCoordinate() {
+    return toCoordinate;
+  }
+
+  public Piece getTakenPiece() {
+    return takenPiece;
+  }
 }
