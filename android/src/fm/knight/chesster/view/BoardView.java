@@ -1,6 +1,6 @@
-package fm.knight.chesster;
+package fm.knight.chesster.view;
 
-import fm.knight.chesster.model.Piece;
+import fm.knight.chesster.model.piece.Piece;
 import fm.knight.chesster.model.Board;
 
 import android.content.Context;
@@ -15,29 +15,18 @@ import android.view.View;
 
 public class BoardView extends View {
 
-  private int boardSize, squareSide;
-  private boolean isSet = true;
-  private Paint color;
-  private Piece piece;
-
-  public BoardView (Context context) {
+  private final Board board;
+  int boardSize;
+  int squareSide;
+  public BoardView (Context context, Board board) {
     super(context);
     setFocusable(true);
     setFocusableInTouchMode(true);
     requestFocus();
-    piece = new Piece(getResources(), 0, 0);
-    color = new Paint(Paint.ANTI_ALIAS_FLAG);
-    color.setColor(Color.BLACK);
+    this.board = board;
   }
 
   public float[] validateTouch(float x, float y, float width, float height) {
-    for (int i = 0; i < width; i+= width/8) {
-      for (int j = 0; j < height; j+= height/8) {
-        if (((x > i) && (x < i + squareSide)) && ((y > j) && (y < j + squareSide))) {
-          return new float[]{i, j};
-        }
-      }
-    }
     return null;
   }
 
@@ -53,8 +42,7 @@ public class BoardView extends View {
   public boolean onTouchEvent(MotionEvent event) {
     float[] xy = validateTouch(event.getX(), event.getY(), getWidth(), getWidth());
     if (xy != null) {
-      piece.posx = (int) xy[0];
-      piece.posy = (int) xy[1];
+      // TODO
       invalidate();
     }
     return true;
@@ -64,16 +52,12 @@ public class BoardView extends View {
   public boolean onKeyDown(int keyCode, KeyEvent event) {
     switch (keyCode) {
     case KeyEvent.KEYCODE_DPAD_UP:
-      if (validateBoundaries(piece.posx, piece.posy - squareSide)) piece.posy -= squareSide;
       break;
     case KeyEvent.KEYCODE_DPAD_DOWN:
-      if (validateBoundaries(piece.posx, piece.posy + squareSide)) piece.posy += squareSide;
       break;
     case KeyEvent.KEYCODE_DPAD_LEFT:
-      if (validateBoundaries(piece.posx - squareSide, piece.posy)) piece.posx -= squareSide;
       break;
     case KeyEvent.KEYCODE_DPAD_RIGHT:
-      if (validateBoundaries(piece.posx + squareSide, piece.posy)) piece.posx += squareSide;
       break;
     }
     invalidate();
@@ -86,34 +70,50 @@ public class BoardView extends View {
     boardSize = Math.min(canvas.getWidth(), canvas.getHeight());
     squareSide = boardSize / 8;
     drawBoard(canvas);
-    drawGradientRect(canvas, boardSize, canvas.getHeight(), 0, boardSize);
-    drawPiece(canvas, piece);
+    //    drawPiece(canvas, piece);
   }
 
+
+  @Override
+  protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    int widthSpecMode = MeasureSpec.getMode(widthMeasureSpec);
+    int heightSpecMode = MeasureSpec.getMode(heightMeasureSpec);
+
+    int widthMeasure = MeasureSpec.getSize(widthMeasureSpec);
+    int heightMeasure = MeasureSpec.getSize(heightMeasureSpec);
+
+    int newWidth, newHeight;
+
+    if (widthSpecMode == MeasureSpec.AT_MOST)
+      newWidth = 30;
+    else
+      newWidth = widthMeasure;
+
+    if (heightSpecMode == MeasureSpec.AT_MOST)
+      newHeight = 30;
+    else
+      newHeight = heightMeasure;
+
+    setMeasuredDimension(newWidth, newHeight);
+  }
+
+
+  
   public void drawBoard(Canvas c) {
+    Paint paint = new Paint();
+    boolean isSet =false;
     for (int i = 0; i < boardSize; i += squareSide) {
       isSet = !isSet;
       for (int j = 0; j < boardSize; j += squareSide) {
-        color.setColor(isSet ? Color.BLACK : Color.WHITE);
-        c.drawRect(new Rect(i, j, i + squareSide, j + squareSide), color);
+        paint.setColor(isSet ? Color.BLACK : Color.WHITE);
+        c.drawRect(new Rect(i, j, i + squareSide, j + squareSide), paint);
         isSet = !isSet;
       }
     }
   }
 
-  public void drawGradientRect(Canvas c, int top, int bottom, int left, int right) {
-    float f = 255 / Float.valueOf(bottom - top);
-    for (int i = 255, j = top; j <= bottom; i -= Math.round(f), j++) {
-      color.setARGB(i, 0, 0, 255);
-      c.drawRect(left, j, right, j+1, color);
-    }
-  }
 
   public void drawPiece(Canvas c, Piece p) {
-    c.drawBitmap(p.b,
-        null,
-        new RectF(p.posx, p.posy, p.posx + squareSide, p.posy + squareSide),
-        p.p);
   }
 
 }

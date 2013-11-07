@@ -1,5 +1,7 @@
 package fm.knight.chesster.model;
 
+import fm.knight.chesster.model.piece.Piece;
+
 public class Move {
 
   private final Coordinate fromCoordinate;
