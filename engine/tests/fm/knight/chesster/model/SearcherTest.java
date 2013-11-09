@@ -23,7 +23,7 @@ public class SearcherTest {
   @Test
   public void testSmoke() {
     Color color = Color.WHITE;
-    for(int i=0; i<12; i++) {
+    for(int i=0; i<4; i++) {
       Move result = target.findBestMove(board, color);
       assertEquals(i, board.getMoveDepth());
       assertNotNull(result);
