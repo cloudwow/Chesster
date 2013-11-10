@@ -53,31 +53,23 @@ public class BoardView extends View {
   }
 
   @Override
-  public boolean onTouchEvent(MotionEvent event) {
-    float[] xy = validateTouch(event.getX(), event.getY(), getWidth(), getWidth());
-    if (xy != null) {
-      // TODO
-      invalidate();
-    }
-    return true;
+  public boolean onTouchEvent(MotionEvent event) 
+  {
+    boolean bRtn;
+    bRtn = super.onTouchEvent(event);
+    switch (event.getAction()) 
+      {
+      case MotionEvent.ACTION_DOWN:
+        int column = (int)event.getX() / mTileSize;
+        int row = 7 - (int)event.getY()/ mTileSize;
+        focusCoordinate = new Coordinate(row,column);
+        invalidate();
+        break;
+      case MotionEvent.ACTION_UP: 
+        break;
+      }
+    return bRtn;
   }
-
-  @Override
-  public boolean onKeyDown(int keyCode, KeyEvent event) {
-    switch (keyCode) {
-    case KeyEvent.KEYCODE_DPAD_UP:
-      break;
-    case KeyEvent.KEYCODE_DPAD_DOWN:
-      break;
-    case KeyEvent.KEYCODE_DPAD_LEFT:
-      break;
-    case KeyEvent.KEYCODE_DPAD_RIGHT:
-      break;
-    }
-    invalidate();
-    return true;
-  }
-
 
   protected void onSizeChanged(int w, int h, int oldw, int oldh) {
     super.onSizeChanged(w, h, oldw, oldh);
@@ -142,7 +134,7 @@ public class BoardView extends View {
       paint.setStyle(Paint.Style.STROKE);
       focusSquare.set(mPosX[focusCoordinate.getColumn()]+1,
           mPosY[focusCoordinate.getRow()]+1,
-          mPosX[focusCoordinate.getRow()]-1 + mTileSize,
+          mPosX[focusCoordinate.getColumn()]-1 + mTileSize,
           mPosY[focusCoordinate.getRow()]-1 + mTileSize);
       paint.setColor(0x400000ff);
       canvas.drawRoundRect(focusSquare,3F,3F, paint);
