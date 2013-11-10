@@ -2,6 +2,7 @@ package fm.knight.chesster;
 
 import fm.knight.chesster.model.Board;
 import fm.knight.chesster.view.BoardView;
+import fm.knight.chesster.view.BoardSurfaceView;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -14,6 +15,6 @@ public class MainActivity extends Activity
   {
     super.onCreate(savedInstanceState);
     //        setContentView(R.layout.main);
-    setContentView(new BoardView(this, new Board()));
+    setContentView(new BoardSurfaceView(this, new Board()));
   }
 }
