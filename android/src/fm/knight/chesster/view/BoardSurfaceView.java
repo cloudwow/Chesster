@@ -1,5 +1,6 @@
 package fm.knight.chesster.view;
 
+
 import fm.knight.chesster.model.piece.Piece;
 import fm.knight.chesster.model.Board;
 import fm.knight.chesster.R;
@@ -23,54 +24,47 @@ import android.graphics.drawable.*;
 import android.os.*;
 import android.view.*;
 
+
 public class BoardSurfaceView extends SurfaceView  implements SurfaceHolder.Callback {
-  private final static String TAG = "Chesster."+BoardSurfaceView.class.getSimpleName();
+  private final static String TAG = "Chesster." + BoardSurfaceView.class.getSimpleName();
   private final Board board;
   int boardSize;
   int squareSide;
   MyThread mythread;
   Context context;
   Bitmap darkTileBitmap;
-  public BoardSurfaceView (Context context, Board board) {
+  public BoardSurfaceView(Context context, Board board) {
     super(context);
     this.board = board;
     this.context = context;
     SurfaceHolder holder = getHolder();
+
     holder.addCallback(this);
     darkTileBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
   }
 
   @Override
-  public void surfaceDestroyed(SurfaceHolder holder)
-  {
+  public void surfaceDestroyed(SurfaceHolder holder) {
     mythread.setRunning(false);
     boolean retry = true;
-    while(retry)
-      {
-        try
-          {
-            mythread.join();
-            retry = false;
-          }
-        catch(Exception e)
-          {
-            Log.v(TAG, e.getMessage());
-          }
+
+    while (retry) {
+      try {
+        mythread.join();
+        retry = false;
+      } catch (Exception e) {
+        Log.v(TAG, e.getMessage());
       }
+    }
   }
-
-
 
   @Override
   public void surfaceChanged(SurfaceHolder holder, int format, int width,
-                             int height)
-  {
-  }
+      int height) {}
 
   @Override
-  public void surfaceCreated(SurfaceHolder holder)
-  {
-    mythread = new MyThread(holder, context,this);
+  public void surfaceCreated(SurfaceHolder holder) {
+    mythread = new MyThread(holder, context, this);
 
     mythread.setRunning(true);
 
@@ -78,46 +72,39 @@ public class BoardSurfaceView extends SurfaceView  implements SurfaceHolder.Call
 
   }
 
-  void doDraw(Canvas canvas)
-  {
+  void doDraw(Canvas canvas) {
     canvas.drawColor(Color.GREEN);
     canvas.drawBitmap(darkTileBitmap, 50, 50, null);
   }
 
-  public class MyThread extends Thread
-  {
+  public class MyThread extends Thread {
     boolean mRun;
     Canvas mcanvas;
     SurfaceHolder surfaceHolder;
     Context context;
     BoardSurfaceView msurfacePanel;
 
-    public MyThread(SurfaceHolder sholder, Context ctx, BoardSurfaceView spanel)
-    {
+    public MyThread(SurfaceHolder sholder, Context ctx, BoardSurfaceView spanel) {
       surfaceHolder = sholder;
       context = ctx;
       mRun = false;
       msurfacePanel = spanel;
     }
 
-    void setRunning(boolean bRun)
-    {
+    void setRunning(boolean bRun) {
       mRun = bRun;
     }
 
     @Override
-    public void run()
-    {
+    public void run() {
       super.run();
-      while(mRun)
-        {
-          mcanvas = surfaceHolder.lockCanvas();
-          if(mcanvas != null)
-            {
-              msurfacePanel.doDraw(mcanvas);
-              surfaceHolder.unlockCanvasAndPost(mcanvas);
-            }
+      while (mRun) {
+        mcanvas = surfaceHolder.lockCanvas();
+        if (mcanvas != null) {
+          msurfacePanel.doDraw(mcanvas);
+          surfaceHolder.unlockCanvasAndPost(mcanvas);
         }
+      }
     }
   }
 }

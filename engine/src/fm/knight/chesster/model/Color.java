@@ -1,5 +1,6 @@
 package fm.knight.chesster.model;
 
+
 public enum Color {
   BLACK(-1), WHITE(1);
 

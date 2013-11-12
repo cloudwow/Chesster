@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+
 public class SearcherTest {
 
   private Searcher target;
@@ -23,8 +24,10 @@ public class SearcherTest {
   @Test
   public void testSmoke() {
     Color color = Color.WHITE;
-    for(int i=0; i<4; i++) {
+
+    for (int i = 0; i < 4; i++) {
       Move result = target.findBestMove(board, color);
+
       assertEquals(i, board.getMoveDepth());
       assertNotNull(result);
       board.makeMove(result);

@@ -1,7 +1,9 @@
 package fm.knight.chesster.model;
 
+
 import fm.knight.chesster.model.piece.Piece;
 import com.google.common.base.Objects;
+
 
 public class Move {
 
@@ -14,7 +16,7 @@ public class Move {
   }
 
   public Move(int fromRow, int fromColumn, int toRow, int toColumn) {
-    this(new Coordinate(fromRow, fromColumn),new Coordinate(toRow, toColumn)); 
+    this(new Coordinate(fromRow, fromColumn), new Coordinate(toRow, toColumn)); 
   }
 
   public Coordinate getFromCoordinate() {
@@ -31,22 +33,22 @@ public class Move {
       return false;
     } else if (obj == this) {
       return true;
-    } else if (!(obj instanceof Move)){
+    } else if (!(obj instanceof Move)) {
       return false;
     }
-    Move otherMove = (Move)obj;
-    return Objects.equal(this.toCoordinate,otherMove.toCoordinate) &&
-      Objects.equal(this.fromCoordinate, otherMove.fromCoordinate);
+    Move otherMove = (Move) obj;
+
+    return Objects.equal(this.toCoordinate, otherMove.toCoordinate)
+        && Objects.equal(this.fromCoordinate, otherMove.fromCoordinate);
   }
 
   @Override
-  public int hashCode()
-  {
-    return Objects.hashCode(toCoordinate,fromCoordinate);
+  public int hashCode() {
+    return Objects.hashCode(toCoordinate, fromCoordinate);
   }
 
   @Override
   public String toString() {
-    return fromCoordinate.toString()+"->"+toCoordinate.toString();
+    return fromCoordinate.toString() + "->" + toCoordinate.toString();
   }
 }

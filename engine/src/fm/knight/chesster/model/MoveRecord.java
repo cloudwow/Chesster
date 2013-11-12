@@ -1,7 +1,9 @@
 package fm.knight.chesster.model;
 
+
 import fm.knight.chesster.model.piece.Piece;
 import com.google.common.base.Objects;
+
 
 public class MoveRecord {
 
@@ -29,24 +31,23 @@ public class MoveRecord {
     return takenPiece;
   }
 
-
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {
       return false;
     } else if (obj == this) {
       return true;
-    } else if (!(obj instanceof MoveRecord)){
+    } else if (!(obj instanceof MoveRecord)) {
       return false;
     }
-    MoveRecord otherMoveRecord = (MoveRecord)obj;
-    return Objects.equal(this.move,otherMoveRecord.move) &&
-      Objects.equal(this.takenPiece, otherMoveRecord.takenPiece);
+    MoveRecord otherMoveRecord = (MoveRecord) obj;
+
+    return Objects.equal(this.move, otherMoveRecord.move)
+        && Objects.equal(this.takenPiece, otherMoveRecord.takenPiece);
   }
 
- @Override
- public int hashCode()
-  {
+  @Override
+  public int hashCode() {
     return Objects.hashCode(move, takenPiece);
   }
 

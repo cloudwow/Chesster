@@ -1,11 +1,13 @@
 package fm.knight.chesster.model.piece;
 
+
 import fm.knight.chesster.model.Board;
 import fm.knight.chesster.model.Color;
 import fm.knight.chesster.model.Coordinate;
 import fm.knight.chesster.model.Move;
 import com.google.common.base.Objects;
 import java.util.List;
+
 
 public class Piece {
 
@@ -14,7 +16,7 @@ public class Piece {
 
   public Piece(Color color, String code) {
     this.color = color;
-    this.code =code;
+    this.code = code;
   }
 
   public Color getColor() {
@@ -30,26 +32,27 @@ public class Piece {
   }
 
   public int getValueAt(int row, int column, int pieceValue, int[] whiteSquareTable, int[] blackSquareTable) {
-    if(this.getColor() == Color.WHITE) {
-      return whiteSquareTable[row*8+column] * pieceValue;
+    if (this.getColor() == Color.WHITE) {
+      return whiteSquareTable[row * 8 + column] * pieceValue;
     } else {
-      return blackSquareTable[row*8+column] * pieceValue;
+      return blackSquareTable[row * 8 + column] * pieceValue;
     }
   }
 
   public void addMoves(Board board, int row, int column, List<Move> moveList) {
-    tryAddMove(board, row, column, row+color.getDirection(), column, moveList);
+    tryAddMove(board, row, column, row + color.getDirection(), column, moveList);
   }
 
   protected boolean tryAddMove(Board board, int fromRow, int fromColumn, int toRow, int toColumn, List<Move> moveList) {
-    if(toRow >7 || toRow<0 || toColumn>7 || toColumn<0) {
+    if (toRow > 7 || toRow < 0 || toColumn > 7 || toColumn < 0) {
       return false;
     }
-    if(fromRow == toRow && fromColumn == toColumn) {
+    if (fromRow == toRow && fromColumn == toColumn) {
       return false;
     }
-    Piece targetPiece=board.getPieceAt(toRow,toColumn);
-    if(targetPiece == null || targetPiece.getColor() != this.getColor()) {
+    Piece targetPiece = board.getPieceAt(toRow, toColumn);
+
+    if (targetPiece == null || targetPiece.getColor() != this.getColor()) {
       moveList.add(new Move(fromRow, fromColumn, toRow, toColumn));
       return true;
     }
@@ -65,15 +68,14 @@ public class Piece {
     } else if (!(obj instanceof Piece)) {
       return false;
     }
-    Piece other = (Piece)obj;
-    return Objects.equal(this.color, other.color) &&
-      Objects.equal(this.code, other.code);
+    Piece other = (Piece) obj;
+
+    return Objects.equal(this.color, other.color) && Objects.equal(this.code, other.code);
   }
 
   @Override
-  public int hashCode()
-  {
-    return Objects.hashCode(color,code);
+  public int hashCode() {
+    return Objects.hashCode(color, code);
   }
 
 }

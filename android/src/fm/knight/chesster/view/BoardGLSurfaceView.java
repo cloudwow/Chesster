@@ -1,5 +1,6 @@
 package fm.knight.chesster.view;
 
+
 import fm.knight.chesster.model.piece.Piece;
 import fm.knight.chesster.model.Board;
 import fm.knight.chesster.R;
@@ -34,21 +35,24 @@ import android.graphics.drawable.*;
 import android.os.*;
 import android.view.*;
 import android.opengl.GLSurfaceView;
+
+
 public class BoardGLSurfaceView extends GLSurfaceView {
-  private final static String TAG = "Chesster."+BoardGLSurfaceView.class.getSimpleName();
+  private final static String TAG = "Chesster." + BoardGLSurfaceView.class.getSimpleName();
   private final Board board;
   int boardSize;
   int squareSide;
   Context context;
   Bitmap mbitmap;
-  public BoardGLSurfaceView (Context context, Board board) {
+  public BoardGLSurfaceView(Context context, Board board) {
     super(context);
     this.board = board;
     this.context = context;
     mbitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
 
     setEGLContextClientVersion(2);
-    setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
+    setEGLConfigChooser(8, 8, 8, 8, 16, 0);
+    setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
     setRenderer(new BoardRenderer());
   }
 
@@ -56,11 +60,10 @@ public class BoardGLSurfaceView extends GLSurfaceView {
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
       GLES20.glClearColor(0.5f, 1.0f, 0.5f, 0.7f);
     }
-    public void onSurfaceChanged(GL10 glUnused, int width, int height) {
 
-    }
-    public void onDrawFrame(GL10 glUnused) {
-    }
+    public void onSurfaceChanged(GL10 glUnused, int width, int height) {}
+
+    public void onDrawFrame(GL10 glUnused) {}
   }
 
 }
