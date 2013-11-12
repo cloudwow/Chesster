@@ -30,14 +30,14 @@ public class BoardSurfaceView extends SurfaceView  implements SurfaceHolder.Call
   int squareSide;
   MyThread mythread;
   Context context;
-  Bitmap mbitmap;
+  Bitmap darkTileBitmap;
   public BoardSurfaceView (Context context, Board board) {
     super(context);
     this.board = board;
     this.context = context;
     SurfaceHolder holder = getHolder();
     holder.addCallback(this);
-    mbitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
+    darkTileBitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class BoardSurfaceView extends SurfaceView  implements SurfaceHolder.Call
   void doDraw(Canvas canvas)
   {
     canvas.drawColor(Color.GREEN);
-    canvas.drawBitmap(mbitmap, 50, 50, null);
+    canvas.drawBitmap(darkTileBitmap, 50, 50, null);
   }
 
   public class MyThread extends Thread

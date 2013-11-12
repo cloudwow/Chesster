@@ -46,14 +46,18 @@ public class BoardGLSurfaceView extends GLSurfaceView {
     this.board = board;
     this.context = context;
     mbitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
+
+    setEGLContextClientVersion(2);
+    setEGLConfigChooser(8 , 8, 8, 8, 16, 0);
     setRenderer(new BoardRenderer());
   }
 
   class BoardRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceCreated(GL10 glUnused, EGLConfig config) {
-      GLES20.glClearColor(0.5f, 0.5f, 0.5f, 0.7f);
+      GLES20.glClearColor(0.5f, 1.0f, 0.5f, 0.7f);
     }
     public void onSurfaceChanged(GL10 glUnused, int width, int height) {
+
     }
     public void onDrawFrame(GL10 glUnused) {
     }
