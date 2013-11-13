@@ -1,11 +1,11 @@
 package fm.knight.chesster.view;
 
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.util.Log;
 import android.content.Context;
 import android.content.res.AssetManager;
+import android.content.res.Resources;
 
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -36,52 +36,54 @@ import java.io.IOException;
  * 5. Act as a base class, if needed, for abstracting textures
  */
 public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
-  public static String TAG = "Chessters.AbstractRenderer";
+  public static String TAG = "Chesster." + AbstractRenderer.class.getSimpleName();
 
   // Class level or global variables are usually
   // unhealthy. Try to minimize them!!
 
   // The target matrix that holds the end result
   // of all model transformations
-  private float[] mCurrentModelMatrix = new float[16];
+  private float[] currentModelMatrix = new float[16];
 
   // A matrix that is a result of setting the camera/eye
-  private float[] mVMatrix = new float[16];
+  private float[] viewMatrix = new float[16];
 
   // A matrix that is the result of setting the frustum
-  private float[] mProjMatrix = new float[16];
+  private float[] projectionMatrix = new float[16];
 
   // A matrix that is a multiple of current model, view,
   // and projection matrices.
-  private float[] mMVPMatrix = new float[16];
+  private float[] productMatrix = new float[16];
 
   // GLSL program object with both the shaders compiled,
   // linked, and attached.
-  private int mProgram;
+  private int shaderProgram;
 
   // A handle for the uniform variable identifying the MVP matrix
-  private int muMVPMatrixHandle;
+  private int productMatrixHandle;
 
   // An attribute handle in the vertex shader
   // for passing the vertex arrays.
-  private int maPositionHandle;
+  private int positionAttributeHandle;
 
   // Name of the default vertex shader
   // source code file in the asset directory.
-  private static final String DEF_VERTEX_SHADER_FILENAME = "def_vertex_shader.txt";
+  private final String vertexShaderFilename;
 
   // Name of the default fragment shader
   // source code file in the asset directory.
-  private static final String DEF_FRAGMENT_SHADER_FILENAME = "def_fragment_shader.txt";
+  private final String fragmentShaderFileName;
 
-  Context context;
+  private final Context context;
     
   /*
    * This class relies on virtual methods to specialize.
    * Doesn't use construction arguments for specialization.
    */
-  public AbstractRenderer(Context context) {
+  public AbstractRenderer(Context context, String vertexShaderFilename, String fragmentShaderFileName) {
     this.context = context;
+    this.vertexShaderFilename = vertexShaderFilename;
+    this.fragmentShaderFileName = fragmentShaderFileName;
     initializeMatrices();
   }
 
@@ -89,11 +91,11 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     // Set the model matrix to identity
     // Subsequent scaling, rotation, etc will update this
     // in a stateful manner. So starting state matters.
-    Matrix.setIdentityM(this.mCurrentModelMatrix, 0);
+    Matrix.setIdentityM(this.currentModelMatrix, 0);
 
     // Although we use this matrix only once,
     // it is good to start with a known state.
-    Matrix.setIdentityM(mMVPMatrix, 0);
+    Matrix.setIdentityM(productMatrix, 0);
   }
 
   // @Override the interface method of Renderer
@@ -111,19 +113,20 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
    */
   public void prepareSurface(GL10 gl, EGLConfig eglConfig) {
     Log.d(TAG, "preparing surface");
-    mProgram = createProgram(this.getVertexShaderCodeString(), this.getFragmentShaderCodeString());
-    if (mProgram == 0) {
+    shaderProgram = createProgram(this.getVertexShaderCodeString(),
+            this.getFragmentShaderCodeString());
+    if (shaderProgram == 0) {
       return;
     }
     Log.d(TAG, "Getting position handle:aPosition");
-    // maPositionHandle = GLES20.glGetAttribLocation(mProgram,
+    // positionAttributeHandle = GLES20.glGetAttribLocation(shaderProgram,
     // "aPosition");
-    maPositionHandle = getAttributeHandle("aPosition", "Getting Position Handle");
+    positionAttributeHandle = getAttributeHandle("aPosition", "Getting Position Handle");
 
     Log.d(TAG, "Getting matrix handle:uMVPMatrix");
-    // muMVPMatrixHandle = GLES20.glGetUniformLocation(mProgram,
+    // productMatrixHandle = GLES20.glGetUniformLocation(shaderProgram,
     // "uMVPMatrix");
-    muMVPMatrixHandle = getUniformHandle("uMVPMatrix", "Getting MVP uniform matrix handle");
+    productMatrixHandle = getUniformHandle("uMVPMatrix", "Getting MVP uniform matrix handle");
   }
 
   // Override this method to specify your
@@ -131,6 +134,10 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   protected FrustumDimensions getFrustumDimensions() {
     // Get default dimensions in this base class
     return FrustumDimensions.getDefault();
+  }
+
+  protected Resources getResources() {
+    return context.getResources();
   }
 
   // @Override the interface method of Renderer
@@ -143,9 +150,9 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     float ratio = (float) w / h;
     FrustumDimensions fd = this.getFrustumDimensions();
 
-    // Matrix.setIdentityM(mProjMatrix, 0);
-    Matrix.frustumM(mProjMatrix, 0, ratio * fd.bottom, ratio * fd.top, fd.bottom, fd.top, fd.near,
-        fd.far);
+    // Matrix.setIdentityM(projectionMatrix, 0);
+    Matrix.frustumM(projectionMatrix, 0, ratio * fd.bottom, ratio * fd.top, fd.bottom, fd.top,
+            fd.near, fd.far);
   }
 
   // @Override the interface method of Renderer
@@ -157,23 +164,23 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   // 3. Use the program of choice
   public void onDrawFrame(GL10 gl) {
     Log.d(TAG, "set look at matrix: view matrix");
-    // Matrix.setIdentityM(mVMatrix, 0);
-    Matrix.setLookAtM(mVMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
+    // Matrix.setIdentityM(viewMatrix, 0);
+    Matrix.setLookAtM(viewMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
     Log.d(TAG, "base drawframe");
     GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
     GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
-    GLES20.glUseProgram(mProgram);
+    GLES20.glUseProgram(shaderProgram);
     checkGlError("glUseProgram");
 
     // Allow a derived class to setup drawing
     // for further down the chain.
     // the default doesn't do anything.
-    preDraw(gl, this.maPositionHandle);
+    preDraw(gl, this.positionAttributeHandle);
 
     // Real abstract method
-    draw(gl, this.maPositionHandle);
+    draw(gl, this.positionAttributeHandle);
   }
 
   /*
@@ -251,7 +258,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   }
 
   /*
-   * The following three methods update the mCurrentModelMatrix
+   * The following three methods update the currentModelMatrix
    * with the given model transformation.
    * These are stateful accumulative methods.
    */
@@ -260,7 +267,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     Matrix.setIdentityM(tempModelMatrix, 0);
     Matrix.translateM(tempModelMatrix, 0, x, y, z);
-    Matrix.multiplyMM(this.mCurrentModelMatrix, 0, tempModelMatrix, 0, this.mCurrentModelMatrix, 0);
+    Matrix.multiplyMM(this.currentModelMatrix, 0, tempModelMatrix, 0, this.currentModelMatrix, 0);
   }
 
   public void rotate(float angle, float x, float y, float z) {
@@ -268,7 +275,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     Matrix.setIdentityM(tempModelMatrix, 0);
     Matrix.rotateM(tempModelMatrix, 0, angle, x, y, z);
-    Matrix.multiplyMM(this.mCurrentModelMatrix, 0, tempModelMatrix, 0, this.mCurrentModelMatrix, 0);
+    Matrix.multiplyMM(this.currentModelMatrix, 0, tempModelMatrix, 0, this.currentModelMatrix, 0);
   }
 
   public void scale(float xFactor, float yFactor, float zFactor) {
@@ -276,7 +283,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     Matrix.setIdentityM(tempModelMatrix, 0);
     Matrix.scaleM(tempModelMatrix, 0, xFactor, yFactor, zFactor);
-    Matrix.multiplyMM(this.mCurrentModelMatrix, 0, tempModelMatrix, 0, this.mCurrentModelMatrix, 0);
+    Matrix.multiplyMM(this.currentModelMatrix, 0, tempModelMatrix, 0, this.currentModelMatrix, 0);
   }
 
   /*
@@ -291,23 +298,23 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     Matrix.setIdentityM(tempModelMatrix, 0);
 
     // translate the model combo next
-    Matrix.multiplyMM(mMVPMatrix, 0, // matrix and offset
-        mCurrentModelMatrix, 0, tempModelMatrix, 0);
+    Matrix.multiplyMM(productMatrix, 0, // matrix and offset
+            currentModelMatrix, 0, tempModelMatrix, 0);
 
     // translate eye coordinates first
-    Matrix.multiplyMM(mMVPMatrix, 0, this.mVMatrix, 0, mMVPMatrix, 0);
+    Matrix.multiplyMM(productMatrix, 0, this.viewMatrix, 0, productMatrix, 0);
 
     // Project it: screen coordinates
-    Matrix.multiplyMM(mMVPMatrix, 0, mProjMatrix, 0, mMVPMatrix, 0);
+    Matrix.multiplyMM(productMatrix, 0, projectionMatrix, 0, productMatrix, 0);
 
     // Set the vertex uniform handler representing the MVP matrix
-    GLES20.glUniformMatrix4fv(muMVPMatrixHandle, // uniform handle
-        1, // number of uniforms. 1 if it is not
-        // an array
-        false, // transpose: must be false
-        mMVPMatrix, // client matrix memory
-        // pointer
-        0); // offset
+    GLES20.glUniformMatrix4fv(productMatrixHandle, // uniform handle
+            1, // number of uniforms. 1 if it is not
+            // an array
+            false, // transpose: must be false
+            productMatrix, // client matrix memory
+            // pointer
+            0); // offset
   }
 
   // Override this method to continue the onDrawframe callback
@@ -322,20 +329,20 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   // Use this method if your intent is to return
   // a default vertex shader.
   public String getDefaultVertexShaderCodeString() {
-    return this.getStringFromAssetFile(DEF_VERTEX_SHADER_FILENAME);
+    return this.getStringFromAssetFile(vertexShaderFilename);
   }
 
   // Use this method if your intent is to return
   // a default fragment shader.
   public String getDefaultFragmentShaderCodeString() {
-    return this.getStringFromAssetFile(DEF_FRAGMENT_SHADER_FILENAME);
+    return this.getStringFromAssetFile(fragmentShaderFileName);
   }
 
   // Override this method if you want to provide
   // a different vertex shader program.
   protected String getVertexShaderCodeString() {
     String vertexShader = "uniform mat4 uMVPMatrix;\n" + "attribute vec4 aPosition;\n"
-        + "void main() {\n" + "  gl_Position = uMVPMatrix * aPosition;\n" + "}\n";
+            + "void main() {\n" + "  gl_Position = uMVPMatrix * aPosition;\n" + "}\n";
 
     return vertexShader;
   }
@@ -346,7 +353,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   // to read as string to be returned from here.
   protected String getFragmentShaderCodeString() {
     String fragmentShader = "void main() {\n" + "  gl_FragColor = vec4(0.5, 0.25, 0.5, 1.0);\n"
-        + "}\n";
+            + "}\n";
 
     return fragmentShader;
   }
@@ -392,7 +399,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   // surface is created and prepared in this base class.
   // otherwise it will be null.
   public int getGLSProgramObjectReference() {
-    return this.mProgram;
+    return this.shaderProgram;
   }
 
   public int getAttributeHandle(String GLSLAttributeName, String comment) {
@@ -400,7 +407,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     // Get texture handle
     Log.d(TAG, comment);
-    int attributeHandle = GLES20.glGetAttribLocation(mProgram, GLSLAttributeName);
+    int attributeHandle = GLES20.glGetAttribLocation(shaderProgram, GLSLAttributeName);
 
     checkGlError(logComment);
     if (attributeHandle == -1) {
@@ -414,7 +421,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     // Get texture handle
     Log.d(TAG, comment);
-    int uniformHandle = GLES20.glGetUniformLocation(mProgram, GLSLUniformName);
+    int uniformHandle = GLES20.glGetUniformLocation(shaderProgram, GLSLUniformName);
 
     checkGlError(logComment);
     if (uniformHandle == -1) {
