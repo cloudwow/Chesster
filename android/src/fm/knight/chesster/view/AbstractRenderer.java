@@ -1,5 +1,6 @@
 package fm.knight.chesster.view;
 
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 import android.util.Log;
@@ -80,14 +81,17 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
    * This class relies on virtual methods to specialize.
    * Doesn't use construction arguments for specialization.
    */
-  public AbstractRenderer(Context context, String vertexShaderFilename, String fragmentShaderFileName) {
+  public AbstractRenderer(
+      Context context,
+      String vertexShaderFilename,
+      String fragmentShaderFileName) {
     this.context = context;
     this.vertexShaderFilename = vertexShaderFilename;
     this.fragmentShaderFileName = fragmentShaderFileName;
     initializeMatrices();
   }
 
-  public void initializeMatrices() {
+  protected void initializeMatrices() {
     // Set the model matrix to identity
     // Subsequent scaling, rotation, etc will update this
     // in a stateful manner. So starting state matters.
@@ -98,36 +102,8 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     Matrix.setIdentityM(productMatrix, 0);
   }
 
-  // @Override the interface method of Renderer
-  // JDK 1.5 doesn't allow this override tag on ab
-  public void onSurfaceCreated(GL10 gl, EGLConfig eglConfig) {
-    prepareSurface(gl, eglConfig);
-  }
+  // overridables
 
-  /**
-   * 1. Create the GLSL program object by passing vertex
-   * and shader code. Derived classes can supply their own shader
-   * programs.
-   * 2. Get vertex position hanndle
-   * 3. get the uniform mvp matrix handle
-   */
-  public void prepareSurface(GL10 gl, EGLConfig eglConfig) {
-    Log.d(TAG, "preparing surface");
-    shaderProgram = createProgram(this.getVertexShaderCodeString(),
-            this.getFragmentShaderCodeString());
-    if (shaderProgram == 0) {
-      return;
-    }
-    Log.d(TAG, "Getting position handle:aPosition");
-    // positionAttributeHandle = GLES20.glGetAttribLocation(shaderProgram,
-    // "aPosition");
-    positionAttributeHandle = getAttributeHandle("aPosition", "Getting Position Handle");
-
-    Log.d(TAG, "Getting matrix handle:uMVPMatrix");
-    // productMatrixHandle = GLES20.glGetUniformLocation(shaderProgram,
-    // "uMVPMatrix");
-    productMatrixHandle = getUniformHandle("uMVPMatrix", "Getting MVP uniform matrix handle");
-  }
 
   // Override this method to specify your
   // your own frustum or the dimensions of a viewing volume.
@@ -136,33 +112,74 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     return FrustumDimensions.getDefault();
   }
 
-  protected Resources getResources() {
-    return context.getResources();
+  // Override this method to continue the onDrawframe callback
+  // from the renderer.
+  protected abstract void draw(
+      GL10 gl,
+      int positionHandle);
+
+  // Override this to implement preDraw
+  // useful for derived classes to specialize pre-draws
+  protected void preDraw(
+      GL10 gl,
+      int positionHandle) {// none for this class
   }
 
-  // @Override the interface method of Renderer
-  // JDK 1.5 doesn't allow this override tag on absolute methods
+  // Override this method if you want to provide
+  // a different vertex shader program.
+  protected String getVertexShaderCodeString() {
+    String vertexShader = "uniform mat4 uMVPMatrix;\n" + "attribute vec4 aPosition;\n"
+        + "void main() {\n" + "  gl_Position = uMVPMatrix * aPosition;\n" + "}\n";
+
+    return vertexShader;
+  }
+
+  // Override this method if you want to provide
+  // a different vertex shader program.
+  // In a derived method call getStringFromAssetFile(filename)
+  // to read as string to be returned from here.
+  protected String getFragmentShaderCodeString() {
+    String fragmentShader = "void main() {\n" + "  gl_FragColor = vec4(0.5, 0.25, 0.5, 1.0);\n"
+        + "}\n";
+
+    return fragmentShader;
+  }
+
+  // end overridables
+
+  @Override
+  public void onSurfaceCreated(
+      GL10 gl,
+      EGLConfig eglConfig) {
+    prepareSurface(gl, eglConfig);
+  }
+
   // Based on width and height of the window set the
   // viewport and the frustum.
-  public void onSurfaceChanged(GL10 gl, int w, int h) {
+  @Override
+  public void onSurfaceChanged(
+      GL10 gl,
+      int w,
+      int h) {
     Log.d(TAG, "surface changed. Setting matrix frustum: projection matrix");
     GLES20.glViewport(0, 0, w, h);
     float ratio = (float) w / h;
     FrustumDimensions fd = this.getFrustumDimensions();
 
     // Matrix.setIdentityM(projectionMatrix, 0);
-    Matrix.frustumM(projectionMatrix, 0, ratio * fd.bottom, ratio * fd.top, fd.bottom, fd.top,
-            fd.near, fd.far);
+    Matrix.frustumM(projectionMatrix, 0, ratio * fd.bottom, ratio * fd.top, fd.bottom, fd.top
+        ,
+        fd.near, fd.far);
   }
 
-  // @Override the interface method of Renderer
-  // JDK 1.5 doesn't allow this override tag on absolute methods
   // 1. Set your camera. You can place this method while creating
   // the surface or changing the surface. Or you can choose to
   // vary it during the draw method.
   // 2. Do some basic drawing methods like clear the palletee
   // 3. Use the program of choice
-  public void onDrawFrame(GL10 gl) {
+  @Override
+  public void onDrawFrame(
+      GL10 gl) {
     Log.d(TAG, "set look at matrix: view matrix");
     // Matrix.setIdentityM(viewMatrix, 0);
     Matrix.setLookAtM(viewMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
@@ -183,6 +200,41 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     draw(gl, this.positionAttributeHandle);
   }
 
+  /**
+   * Access to the android {@link Context}.
+   */
+  protected Resources getResources() {
+    return context.getResources();
+  }
+
+  /**
+   * 1. Create the GLSL program object by passing vertex
+   * and shader code. Derived classes can supply their own shader
+   * programs.
+   * 2. Get vertex position hanndle
+   * 3. get the uniform mvp matrix handle
+   */
+  protected void prepareSurface(
+      GL10 gl,
+      EGLConfig eglConfig) {
+    Log.d(TAG, "preparing surface");
+    shaderProgram = createProgram(this.getVertexShaderCodeString()
+        ,
+        this.getFragmentShaderCodeString());
+    if (shaderProgram == 0) {
+      return;
+    }
+    Log.d(TAG, "Getting position handle:aPosition");
+    // positionAttributeHandle = GLES20.glGetAttribLocation(shaderProgram,
+    // "aPosition");
+    positionAttributeHandle = getAttributeHandle("aPosition", "Getting Position Handle");
+
+    Log.d(TAG, "Getting matrix handle:uMVPMatrix");
+    // productMatrixHandle = GLES20.glGetUniformLocation(shaderProgram,
+    // "uMVPMatrix");
+    productMatrixHandle = getUniformHandle("uMVPMatrix", "Getting MVP uniform matrix handle");
+  }
+
   /*
    * 1. Load vertex shader
    * 2. load fragment shader
@@ -190,7 +242,9 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
    * 4. attach shaders
    * 5. link program and return it
    */
-  private int createProgram(String vertexSource, String fragmentSource) {
+  private int createProgram(
+      String vertexSource,
+      String fragmentSource) {
     int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexSource);
 
     if (vertexShader == 0) {
@@ -228,7 +282,9 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   /*
    * Load a given type of shader and check for any errors
    */
-  private int loadShader(int shaderType, String source) {
+  private int loadShader(
+      int shaderType,
+      String source) {
     int shader = GLES20.glCreateShader(shaderType);
 
     if (shader != 0) {
@@ -248,7 +304,8 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   }
 
   // Use this method to check and log GL errors
-  protected void checkGlError(String op) {
+  protected void checkGlError(
+      String op) {
     int error;
 
     while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
@@ -262,7 +319,10 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
    * with the given model transformation.
    * These are stateful accumulative methods.
    */
-  public void trnslate(float x, float y, float z) {
+  public void trnslate(
+      float x,
+      float y,
+      float z) {
     float[] tempModelMatrix = new float[16];
 
     Matrix.setIdentityM(tempModelMatrix, 0);
@@ -270,7 +330,11 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     Matrix.multiplyMM(this.currentModelMatrix, 0, tempModelMatrix, 0, this.currentModelMatrix, 0);
   }
 
-  public void rotate(float angle, float x, float y, float z) {
+  public void rotate(
+      float angle,
+      float x,
+      float y,
+      float z) {
     float[] tempModelMatrix = new float[16];
 
     Matrix.setIdentityM(tempModelMatrix, 0);
@@ -278,7 +342,10 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     Matrix.multiplyMM(this.currentModelMatrix, 0, tempModelMatrix, 0, this.currentModelMatrix, 0);
   }
 
-  public void scale(float xFactor, float yFactor, float zFactor) {
+  public void scale(
+      float xFactor,
+      float yFactor,
+      float zFactor) {
     float[] tempModelMatrix = new float[16];
 
     Matrix.setIdentityM(tempModelMatrix, 0);
@@ -299,7 +366,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     // translate the model combo next
     Matrix.multiplyMM(productMatrix, 0, // matrix and offset
-            currentModelMatrix, 0, tempModelMatrix, 0);
+        currentModelMatrix, 0, tempModelMatrix, 0);
 
     // translate eye coordinates first
     Matrix.multiplyMM(productMatrix, 0, this.viewMatrix, 0, productMatrix, 0);
@@ -309,21 +376,12 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
     // Set the vertex uniform handler representing the MVP matrix
     GLES20.glUniformMatrix4fv(productMatrixHandle, // uniform handle
-            1, // number of uniforms. 1 if it is not
-            // an array
-            false, // transpose: must be false
-            productMatrix, // client matrix memory
-            // pointer
-            0); // offset
-  }
-
-  // Override this method to continue the onDrawframe callback
-  // from the renderer.
-  protected abstract void draw(GL10 gl, int positionHandle);
-
-  // Override this to implement preDraw
-  // useful for derived classes to specialize pre-draws
-  protected void preDraw(GL10 gl, int positionHandle) {// none for this class
+        1, // number of uniforms. 1 if it is not
+        // an array
+        false, // transpose: must be false
+        productMatrix, // client matrix memory
+        // pointer
+        0); // offset
   }
 
   // Use this method if your intent is to return
@@ -338,33 +396,14 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     return this.getStringFromAssetFile(fragmentShaderFileName);
   }
 
-  // Override this method if you want to provide
-  // a different vertex shader program.
-  protected String getVertexShaderCodeString() {
-    String vertexShader = "uniform mat4 uMVPMatrix;\n" + "attribute vec4 aPosition;\n"
-            + "void main() {\n" + "  gl_Position = uMVPMatrix * aPosition;\n" + "}\n";
-
-    return vertexShader;
-  }
-
-  // Override this method if you want to provide
-  // a different vertex shader program.
-  // In a derived method call getStringFromAssetFile(filename)
-  // to read as string to be returned from here.
-  protected String getFragmentShaderCodeString() {
-    String fragmentShader = "void main() {\n" + "  gl_FragColor = vec4(0.5, 0.25, 0.5, 1.0);\n"
-            + "}\n";
-
-    return fragmentShader;
-  }
-
   // How to to read a text file from an asset
   // directory. In this approach you will need to
   // create your application object and provide a static
   // variable to create the context.
   // See MyApplication implementation to see how this works.
   // Or see http://androidbook.com/item/4224
-  public String getStringFromAssetFile(String filename) {
+  public String getStringFromAssetFile(
+      String filename) {
     if (context == null) {
       throw new RuntimeException("Sorry your app context is null");
     }
@@ -382,7 +421,8 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
 
   // Converting a file stream to a string
   // Optimize as you see fit. This may not be an efficient read
-  private String convertStreamToString(InputStream is)
+  private String convertStreamToString(
+      InputStream is)
     throws IOException {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     int i = is.read();
@@ -402,7 +442,9 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     return this.shaderProgram;
   }
 
-  public int getAttributeHandle(String GLSLAttributeName, String comment) {
+  public int getAttributeHandle(
+      String GLSLAttributeName,
+      String comment) {
     String logComment = comment + ":" + GLSLAttributeName;
 
     // Get texture handle
@@ -416,7 +458,9 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
     return attributeHandle;
   }
 
-  public int getUniformHandle(String GLSLUniformName, String comment) {
+  public int getUniformHandle(
+      String GLSLUniformName,
+      String comment) {
     String logComment = comment + ":" + GLSLUniformName;
 
     // Get texture handle

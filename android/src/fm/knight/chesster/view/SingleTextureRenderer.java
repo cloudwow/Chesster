@@ -17,15 +17,16 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
   public static String TAG = "Chesster." + SingleTextureRenderer.class.getSimpleName();
 
   // Handle to the texture attribute in the vertex shader
-  private int maTextureHandle;
+  private int textureAttributeHandler;
   // handle to the texture Sampler Uniform variable in the fragment
   // shader
-  private int mu2DSamplerTexture;
+  private int textureSamplerUniformHandle;
 
   // Client assigned name of the texture
-  int mTextureID;
+  int textureId;
+
   // default texture ImageResourceId
-  final int mDefTextureImageResourceId;
+  final int defaultTextureImageResourceId;
 
   public SingleTextureRenderer(
       Context context,
@@ -33,13 +34,13 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
       String fragmentShaderFileName,
       int textureResourceId) {
     super(context, vertexShaderFilename, fragmentShaderFileName);
-    this.mDefTextureImageResourceId = textureResourceId;
+    this.defaultTextureImageResourceId = textureResourceId;
   }
 
   // give out the texture attribute handle
   // if needed.
   protected int getTextureHandle() {
-    return maTextureHandle;
+    return textureAttributeHandler;
   }
 
   // You can prepare and load your texture here
@@ -58,11 +59,13 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
       EGLConfig eglConfig) {
     // Get texture attribute handle
     Log.d(TAG, "Getting texture handle:aTextureCoordinate");
-    maTextureHandle = getAttributeHandle("aTextureCoordinate", "Getting Texture handle");
+    textureAttributeHandler = getAttributeHandle("aTextureCoordinate", "Getting Texture handle");
 
     // Get uniform texture handle
     Log.d(TAG, "Getting texture 2D sampler handle");
-    mu2DSamplerTexture = getUniformHandle("s_2DtextureSampler", "Getting 2D sampler for texture");
+    textureSamplerUniformHandle = getUniformHandle("s_2DtextureSampler"
+        ,
+        "Getting 2D sampler for texture");
 
     this.prepareTexture();
   }
@@ -81,12 +84,12 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
 
     // Make texture target 2D and texture name mTextureId
     // as the target texture for the active texture unit
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureID);
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
     // Tell the texture sampler in GLSL that the texture to
     // sample belongs to teh texture unit 0.
     // This is also the default
-    GLES20.glUniform1i(mu2DSamplerTexture, 0);
+    GLES20.glUniform1i(textureSamplerUniformHandle, 0);
 
   }
 
@@ -94,11 +97,11 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
   // Make sure it is initialized before calling this
   // method.
   public int getTextureID() {
-    return mTextureID;
+    return textureId;
   }
 
   // Ultimately this code prepares the
-  // texture ID mTextureID,
+  // texture ID textureId,
   // creates it, and binds it to teh texture target 2D.
   public void prepareTexture() {
     // GLES20.glEnable(GLES20.GL_TEXTURE_2D);
@@ -106,8 +109,8 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
 
     GLES20.glGenTextures(1, textures, 0);
 
-    mTextureID = textures[0];
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureID);
+    textureId = textures[0];
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
 
     GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
     GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
@@ -128,6 +131,6 @@ public abstract class SingleTextureRenderer extends AbstractRenderer {
 
   // override this to give your own texture image resource id
   protected int getTextureImageResourceId() {
-    return this.mDefTextureImageResourceId;
+    return this.defaultTextureImageResourceId;
   }
 }

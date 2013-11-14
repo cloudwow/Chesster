@@ -53,7 +53,7 @@ public class BoardGLSurfaceView extends GLSurfaceView {
     setEGLContextClientVersion(2);
     setEGLConfigChooser(8, 8, 8, 8, 16, 0);
     setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-    setRenderer(new BoardRenderer());
+    setRenderer(new CubeRenderer(context));
   }
 
   class BoardRenderer implements GLSurfaceView.Renderer {
