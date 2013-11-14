@@ -234,7 +234,7 @@ public class CubeRenderer extends SingleTextureRenderer {
   protected FrustumDimensions getFrustumDimensions() {
     return FrustumDimensions.getMedium();
   }
-
+  
   // Indicate the fragment shader source code
   @Override
   protected String getFragmentShaderCodeString() {
@@ -247,7 +247,7 @@ public class CubeRenderer extends SingleTextureRenderer {
     return this.getStringFromAssetFile(VERTEX_SHADER_FILENAME);
     // return this.getDefaultVertexShaderCodeString();
   }
-    
+  
   // Stop the rotation. Called by a client
   // on a button click or other user actions.
   public void stop() {

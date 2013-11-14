@@ -1,0 +1,7 @@
+precision mediump float; //Appears Mandatory for this version of GLSL 
+varying vec2 v_TextureCoordinate;
+uniform sampler2D s_2DtextureSampler;
+void main() 
+{
+   gl_FragColor = texture2D(s_2DtextureSampler, v_TextureCoordinate);
+}
