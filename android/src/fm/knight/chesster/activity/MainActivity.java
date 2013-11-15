@@ -1,4 +1,5 @@
-package fm.knight.chesster;
+
+package fm.knight.chesster.activity;
 
 
 import fm.knight.chesster.model.Board;
