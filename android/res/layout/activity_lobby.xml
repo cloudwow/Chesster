@@ -4,7 +4,8 @@
     android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-  <fragment android:name=".fragment.LobbyFragment"
+  
+  <fragment android:name="fm.knight.chesster.fragment.LobbyFragment"
             android:id="@+id/lobbyFragment"
             android:layout_weight="1"
             android:layout_width="0dp"

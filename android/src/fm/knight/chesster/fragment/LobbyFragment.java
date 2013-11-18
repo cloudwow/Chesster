@@ -1,7 +1,8 @@
-package fm.knight.chesster.activity;
+package fm.knight.chesster.fragment;
 
 
 import fm.knight.chesster.R;
+import fm.knight.chesster.activity.MainActivity;
 
 import android.app.Fragment;
 import android.content.Intent;
@@ -10,26 +11,35 @@ import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageView;
 
 
 public class LobbyFragment extends Fragment {
 
-  private Button startButton;
+  private ImageView startView;
+
+  public LobbyFragment() {
+  }
+
   @Override
   public View onCreateView(
-      LayoutInflater inflater,
-      ViewGroup container,
-      Bundle savedInstanceState) {
+                           LayoutInflater inflater,
+                           ViewGroup container,
+                           Bundle savedInstanceState) {
     // Inflate the layout for this fragment
     View myView = inflater.inflate(R.layout.fragment_lobby, container, false);
 
-    startButton = (Button) myView.findViewById(R.id.lobby_start_button);
-    startButton.setOnClickListener(new View.OnClickListener() {
-      public void onClick(
-          View v) {}
-    });
-      
+    startView = (ImageView) myView.findViewById(R.id.lobby_button_start);
+    if (startView==null) {
+      throw new RuntimeException("start button not found in layout");
+    }
+    startView.setOnClickListener(new View.OnClickListener() {
+        public void onClick(View v) {
+          Intent game = new Intent(getActivity().getApplicationContext(),MainActivity.class);
+          startActivity(game);
+        }
+      });
+
     return myView;
   }
 }

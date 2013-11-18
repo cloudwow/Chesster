@@ -4,22 +4,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background" >
- 
-    <ImageView
-        android:id="@+id/imgLogo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:src="@drawable/cube_texture" />
- 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="10dp"
-        android:textSize="12dp"
-        android:textColor="#454545"
-        android:gravity="center_horizontal"
-        android:layout_alignParentBottom="true"
-        android:text="Chesster" />
+<ImageView android:id="@+id/splashScreenImage" 
+           android:src="@drawable/splash_image" 
+           android:layout_width="match_parent" 
+           android:layout_height="match_parent">
+</ImageView>
+    <TextView 
+        android:text="Chesster by: David Knight" 
+        android:id="@+id/creditsText"
+        android:layout_gravity="center_horizontal|bottom"
+        android:layout_height="wrap_content" 
+        android:layout_width="wrap_content">
+    </TextView>       
+
  
 </RelativeLayout>

@@ -4,6 +4,8 @@ package fm.knight.chesster.view;
 import fm.knight.chesster.model.piece.Piece;
 import fm.knight.chesster.model.Board;
 import fm.knight.chesster.R;
+import fm.knight.chesster.GameVars;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
@@ -46,14 +48,15 @@ public class BoardGLSurfaceView extends GLSurfaceView {
   Bitmap mbitmap;
   public BoardGLSurfaceView(Context context, Board board) {
     super(context);
+    GameVars.context = context;
     this.board = board;
     this.context = context;
     mbitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
 
-    setEGLContextClientVersion(2);
+    //    setEGLContextClientVersion(2);
     setEGLConfigChooser(8, 8, 8, 8, 16, 0);
     //    setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-    setRenderer(new CubeRenderer(context));
+    setRenderer(new GameRenderer());
   }
 
   class BoardRenderer implements GLSurfaceView.Renderer {
