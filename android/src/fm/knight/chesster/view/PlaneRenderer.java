@@ -55,6 +55,9 @@ public class PlaneRenderer extends SingleTextureRenderer {
     1, 1, 0, -1, 1, 0, -1, -1, 0, // f3,f4,f1
     -1, -1, 0, 1, -1, 0, 1, 1, 0, // 2. back-triangles
 
+    //-1, 1, z, -1, 1, 0, -1, -1, z, // b4 f2 f3
+    //-1, -1, z, -1, 1, 0, -1, -1, 0, // 5. top-triangles
+
     /*
      */
   };
@@ -68,7 +71,7 @@ public class PlaneRenderer extends SingleTextureRenderer {
     0, 1, 1, 1, 1, 0, // 2. back-triangles
   };
   public PlaneRenderer(
-      Context context) {
+                       Context context) {
     super(context, null, null, R.drawable.chessboard);
     // Turn java points to native buffer points
     setupVertexBuffer();
@@ -77,14 +80,17 @@ public class PlaneRenderer extends SingleTextureRenderer {
     setupTextureBuffer();
   }
   public void onSurfaceChanged(
-      GL10 gl,
-      int w,
-      int h) {
-    Log.d(TAG, "surface changed. Setting matrix frustum: projection matrix");
-    GLES20.glViewport(0, 0, w, h);
-    float aspectRatio = (float) w / (float) h;
-    Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1, 1, -1, 1);
-
+                               GL10 gl,
+                               int w,
+                               int h) {
+    //super.onSurfaceChanged(gl,w,h);
+    
+      Log.d(TAG, "surface changed. ORTHOGRAPHIC projection matrix");
+      GLES20.glViewport(0, 0, w, h);
+      float aspectRatio = (float) w / (float) h;
+      Matrix.orthoM(projectionMatrix,0,-w/2,+w/2,-h/2,+h/2,0.5f,8f);
+      //      Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1, 1, 0.1F, 10);
+    
   }
 
   // Convert to a native buffer
@@ -112,7 +118,7 @@ public class PlaneRenderer extends SingleTextureRenderer {
   // Trasfer the vertices from the vertex buffer
   // to the shader.
   private void transferVertexPoints(
-      int vertexPositionHandle) {
+                                    int vertexPositionHandle) {
     GLES20.glVertexAttribPointer(vertexPositionHandle, // bound address
         // in the vertex
         // shader
@@ -137,7 +143,7 @@ public class PlaneRenderer extends SingleTextureRenderer {
   // Notice how textures and vertices use the same concept
   // of attributes and the same APIs.
   private void transferTexturePoints(
-      int texturePositionHandle) {
+                                     int texturePositionHandle) {
     GLES20.glVertexAttribPointer(texturePositionHandle, 2, GLES20.GL_FLOAT, false, 0, textureBuffer);
     checkGlError("glVertexAttribPointer texture array");
     // vertextBuffer.position(TRIANGLE_VERTICES_DATA_UV_OFFSET);
@@ -149,8 +155,8 @@ public class PlaneRenderer extends SingleTextureRenderer {
   // Drawing operation
   @Override
   protected void draw(
-      GL10 gl,
-      int positionHandle) {
+                      GL10 gl,
+                      int positionHandle) {
     // Hide the hidden surfaces using these APIs
     GLES20.glEnable(GLES20.GL_DEPTH_TEST);
     GLES20.glDepthFunc(GLES20.GL_LESS);

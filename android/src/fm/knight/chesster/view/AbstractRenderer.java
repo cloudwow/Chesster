@@ -180,11 +180,11 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   @Override
   public void onDrawFrame(
       GL10 gl) {
-    Log.d(TAG, "set look at matrix: view matrix");
+    //    Log.d(TAG, "set look at matrix: view matrix");
     // Matrix.setIdentityM(viewMatrix, 0);
     Matrix.setLookAtM(viewMatrix, 0, 0, 0, -5, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
-    Log.d(TAG, "base drawframe");
+    //    Log.d(TAG, "base drawframe");
     GLES20.glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
     GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT | GLES20.GL_COLOR_BUFFER_BIT);
 
