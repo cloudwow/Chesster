@@ -41,7 +41,7 @@ public class Background {
   };
 
   public Background() {
-    ByteBuffer byteBuf = ByteBuffer.allocateDirect(vertices.length * 4);
+    ByteBuffer byteBuf = ByteBuffer.allocateDirect(vertices.length * GameVars.BYTES_PER_FLOAT);
     byteBuf.order(ByteOrder.nativeOrder());
     vertexBuffer = byteBuf.asFloatBuffer();
     vertexBuffer.put(vertices);

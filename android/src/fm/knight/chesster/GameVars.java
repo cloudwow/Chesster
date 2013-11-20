@@ -12,6 +12,7 @@ public class GameVars {
   public static final boolean HAPTIC_BUTTON_FEEDBACK = true;
   public static final int GAME_THREAD_FPS_SLEEP = (1000/60);
   public static final int BACKGROUND = R.drawable.library;
+  public static final int BYTES_PER_FLOAT = 4;
 
 
   public boolean onExit(View v) {

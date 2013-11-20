@@ -53,10 +53,10 @@ public class BoardGLSurfaceView extends GLSurfaceView {
     this.context = context;
     mbitmap = BitmapFactory.decodeResource(context.getResources(), R.drawable.tile_dark);
 
-    //    setEGLContextClientVersion(2);
+    setEGLContextClientVersion(2);
     setEGLConfigChooser(8, 8, 8, 8, 16, 0);
     //    setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
-    setRenderer(new GameRenderer());
+    setRenderer(new CubeRenderer(context));
   }
 
   class BoardRenderer implements GLSurfaceView.Renderer {

@@ -1,8 +1,7 @@
 package fm.knight.chesster.view;
 
-
-import fm.knight.chesster.R;
 import fm.knight.chesster.GameVars;
+import fm.knight.chesster.R;
 
 import android.content.Context;
 import android.util.Log;
@@ -19,7 +18,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 
-public class CubeRenderer extends SingleTextureRenderer {
+public class PlaneRenderer extends SingleTextureRenderer {
   // A raw native buffer to hold the point coordinates
   // for the cube.
   private FloatBuffer vertextBuffer;
@@ -50,26 +49,11 @@ public class CubeRenderer extends SingleTextureRenderer {
   // starting bottom-right-anti-clockwise
   // b1(1,-1) b2(1,1) b3(-1,1) b4(-1,-1) : z plane 2
   private float z = 2.0f;
-  private final float[] mTriangleVerticesData = {
+  private final float[] triangleVerticesData = {
     // 1. front-triangles
     // f1,f2,f3
     1, 1, 0, -1, 1, 0, -1, -1, 0, // f3,f4,f1
     -1, -1, 0, 1, -1, 0, 1, 1, 0, // 2. back-triangles
-    // b1,b2,b3
-    1, -1, z, 1, 1, z, -1, 1, z, // b3,b4,b1
-    -1, 1, z, -1, -1, z, 1, -1, z, // 3. right-triangles
-    // b2,f1,f4
-    1, 1, z, 1, 1, 0, 1, -1, 0, // b2,f4,b1
-    1, 1, z, 1, -1, 0, 1, -1, z, // 4. left-triangles
-    // b3, f2, b4
-    -1, 1, z, -1, 1, 0, -1, -1, z, // b4 f2 f3
-    -1, -1, z, -1, 1, 0, -1, -1, 0, // 5. top-triangles
-    // b2, b3, f2
-    1, 1, z, -1, 1, z, -1, 1, 0, // b2, f2, f1
-    1, 1, z, -1, 1, 0, 1, 1, 0, // 6. bottom-triangles
-    // b1, b4, f3
-    1, -1, z, -1, -1, z, -1, -1, 0, // b1, f3, f4
-    1, -1, z, -1, -1, 0, 1, -1, 0
 
     /*
      */
@@ -77,59 +61,51 @@ public class CubeRenderer extends SingleTextureRenderer {
 
   // f1(1,1) f2(0,1) f3(0,0) f4(1,0)
   // b1(1,0) b2(1,1) b3(0,1) b4(0,0)
-  private final float[] mTextureData = {
+  private final float[] textureData = {
     // 1. front-triangles
     // f1,f2,f3
     1, 0, 0, 0, 0, 1, // f3,f4,f1
     0, 1, 1, 1, 1, 0, // 2. back-triangles
-    // b1,b2,b3
-    1, 0, 1, 1, 0, 1, // b3,b4,b1
-    0, 1, 0, 0, 1, 0, // 3. right-triangles
-    // b2,f1,f4
-    1, 1, 0, 1, 0, 0, // b2,f4,b1
-    1, 1, 0, 0, 1, 0, // 4. left-triangles
-    // b3, f2, b4
-    0, 1, 1, 1, 0, 0, // b4 f2 f3
-    0, 0, 1, 1, 1, 0, // 5. top-triangles
-    // b2, b3, f2
-    1, 1, 0, 1, 0, 0, // b2, f2, f1
-    1, 1, 0, 0, 1, 0, // 6. bottom-triangles
-    // b1, b4, f3
-    1, 1, 0, 1, 0, 0, // b1, f3, f4
-    1, 1, 0, 0, 1, 0
-
-    /*
-     */
   };
-  public CubeRenderer(
+  public PlaneRenderer(
       Context context) {
-    super(context, null, null, R.drawable.cube_texture);
+    super(context, null, null, R.drawable.chessboard);
     // Turn java points to native buffer points
     setupVertexBuffer();
     // Turn java texture points to native buffer texture
     // points.
     setupTextureBuffer();
   }
+  public void onSurfaceChanged(
+      GL10 gl,
+      int w,
+      int h) {
+    Log.d(TAG, "surface changed. Setting matrix frustum: projection matrix");
+    GLES20.glViewport(0, 0, w, h);
+    float aspectRatio = (float) w / (float) h;
+    Matrix.orthoM(projectionMatrix, 0, -aspectRatio, aspectRatio, -1, 1, -1, 1);
+
+  }
 
   // Convert to a native buffer
   private void setupTextureBuffer() {
     // Allocate and handle texture buffer
-    ByteBuffer vbb1 = ByteBuffer.allocateDirect(mTextureData.length * GameVars.BYTES_PER_FLOAT);
+    ByteBuffer vbb1 = ByteBuffer.allocateDirect(textureData.length * GameVars.BYTES_PER_FLOAT);
 
     vbb1.order(ByteOrder.nativeOrder());
     textureBuffer = vbb1.asFloatBuffer();
-    textureBuffer.put(mTextureData);
+    textureBuffer.put(textureData);
     textureBuffer.position(0);
   }
 
   // Convert to a native buffer
   private void setupVertexBuffer() {
     // Allocate and handle vertex buffer
-    ByteBuffer vbb = ByteBuffer.allocateDirect(mTriangleVerticesData.length * GameVars.BYTES_PER_FLOAT);
+    ByteBuffer vbb = ByteBuffer.allocateDirect(triangleVerticesData.length * GameVars.BYTES_PER_FLOAT);
 
     vbb.order(ByteOrder.nativeOrder());
     vertextBuffer = vbb.asFloatBuffer();
-    vertextBuffer.put(mTriangleVerticesData);
+    vertextBuffer.put(triangleVerticesData);
     vertextBuffer.position(0);
   }
 
@@ -219,7 +195,7 @@ public class CubeRenderer extends SingleTextureRenderer {
     this.setupMatrices();
 
     // Call glDrawArrays to use the vertices and draw
-    int vertexCount = mTriangleVerticesData.length / 3;
+    int vertexCount = triangleVerticesData.length / 3;
 
     GLES20.glDrawArrays(GLES20.GL_TRIANGLES, // what primitives to use
         0, // at what point to start

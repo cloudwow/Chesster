@@ -1,5 +1,6 @@
 package fm.knight.chesster.activity;
 
+import fm.knight.chesster.event.EventBus;
 import fm.knight.chesster.R;
 
 import android.app.Activity;
@@ -7,10 +8,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 
-public class SplashScreenActivity extends Activity {
+public class SplashScreenActivity extends BaseActivity {
 
   // Splash screen timer
   private static int SPLASH_TIME_OUT = 3000;
+
+  protected void registerListeners(EventBus eventBus) {}
+  protected void unregisterListeners(EventBus eventBus) {}
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {

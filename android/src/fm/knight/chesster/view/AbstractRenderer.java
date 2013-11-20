@@ -50,7 +50,7 @@ public abstract class AbstractRenderer   implements GLSurfaceView.Renderer {
   private float[] viewMatrix = new float[16];
 
   // A matrix that is the result of setting the frustum
-  private float[] projectionMatrix = new float[16];
+  protected float[] projectionMatrix = new float[16];
 
   // A matrix that is a multiple of current model, view,
   // and projection matrices.
