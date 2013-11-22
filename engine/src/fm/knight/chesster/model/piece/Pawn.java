@@ -11,20 +11,31 @@ import java.util.List;
 
 public class Pawn extends Piece {
 
-  public Pawn(Color color) {
+  public Pawn(
+      Color color) {
     super(color, "p");
   }
 
   @Override
-  public int getValueAt(int row, int column) {
-    return getValueAt(row, column, ScoreTables.PawnValue, ScoreTables.whitePawnSquareTable,
+  public int getValueAt(
+      int row,
+      int column) {
+    return getValueAt(row, column, ScoreTables.PawnValue, ScoreTables.whitePawnSquareTable
+        ,
         ScoreTables.blackPawnSquareTable);
   }
 
   @Override
-  public void addMoves(Board board, int row, int column, List<Move> moveList) {
+  public void addMoves(
+      Board board,
+      int row,
+      int column,
+      List<Move> moveList) {
     int nextRow = row + getColor().getDirection();
 
+    if (nextRow > 7 || nextRow < 0) {
+      return;
+    }
     if (board.isEmptyAt(nextRow, column)) {
       moveList.add(new Move(row, column, nextRow, column));
 
