@@ -52,8 +52,8 @@ public class PlaneRenderer extends SingleTextureRenderer {
   private final float[] triangleVerticesData = {
     // 1. front-triangles
     // f1,f2,f3
-    1, 1, 0, -1, 1, 0, -1, -1, 0, // f3,f4,f1
-    -1, -1, 0, 1, -1, 0, 1, 1, 0, // 2. back-triangles
+    80, 80, 0, -80, 80, 0, -80, -80, 0, // f3,f4,f80
+    -80, -80, 0, 80, -80, 0, 80, 80, 0, // 2. back-triangles
 
     //-1, 1, z, -1, 1, 0, -1, -1, z, // b4 f2 f3
     //-1, -1, z, -1, 1, 0, -1, -1, 0, // 5. top-triangles
