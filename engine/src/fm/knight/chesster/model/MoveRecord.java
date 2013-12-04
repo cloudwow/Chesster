@@ -9,12 +9,16 @@ public class MoveRecord {
 
   private final Move move;
   private final Piece takenPiece;
+  private final Coordinate previousEnPassantAttackCoordinate;
+  private final Coordinate previousEnPassantTakeCoordinate;
 
-  public MoveRecord(Move move, Piece takenPiece) {
+  public MoveRecord(Move move, Piece takenPiece, Coordinate previousEnPassantAttackCoordinate, Coordinate previousEnPassantTakeCoordinate) {
     this.move = move;
     this.takenPiece = takenPiece;
+    this.previousEnPassantAttackCoordinate = previousEnPassantAttackCoordinate;
+    this.previousEnPassantTakeCoordinate = previousEnPassantTakeCoordinate;
   }
-  
+
   public Move getMove() {
     return move;
   }
@@ -31,6 +35,14 @@ public class MoveRecord {
     return takenPiece;
   }
 
+  public Coordinate getPreviousEnPassantAttackCoordinate() {
+    return previousEnPassantAttackCoordinate;
+  }
+
+  public Coordinate getPreviousEnPassantTakeCoordinate() {
+    return previousEnPassantTakeCoordinate;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {
@@ -43,7 +55,7 @@ public class MoveRecord {
     MoveRecord otherMoveRecord = (MoveRecord) obj;
 
     return Objects.equal(this.move, otherMoveRecord.move)
-        && Objects.equal(this.takenPiece, otherMoveRecord.takenPiece);
+      && Objects.equal(this.takenPiece, otherMoveRecord.takenPiece);
   }
 
   @Override

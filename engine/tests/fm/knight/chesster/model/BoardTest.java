@@ -87,9 +87,9 @@ public class BoardTest {
 
   @Test
   public void testToString() {
-    String expected = "br bn bb bq bk bb bn br \n" + "bp bp bp bp bp bp bp bp \n"
-        + ".. .. .. .. .. .. .. .. \n" + ".. .. .. .. .. .. .. .. \n" + ".. .. .. .. .. .. .. .. \n"
-        + ".. .. .. .. .. .. .. .. \n" + "wp wp wp wp wp wp wp wp \n" + "wr wn wb wq wk wb wn wr \n";
+    String expected = "R N B Q K B N R \n" + "P P P P P P P P \n"
+        + ". . . . . . . . \n" + ". . . . . . . . \n" + ". . . . . . . . \n"
+        + ". . . . . . . . \n" + "p p p p p p p p \n" + "r n b q k b n r \n";
 
     assertEquals(expected, target.toString());
   }

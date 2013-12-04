@@ -25,6 +25,10 @@ public class Pawn extends Piece {
         ScoreTables.blackPawnSquareTable);
   }
 
+  public boolean isPawn() {
+    return true;
+  }
+
   @Override
   public void addMoves(
       Board board,
@@ -36,6 +40,7 @@ public class Pawn extends Piece {
     if (nextRow > 7 || nextRow < 0) {
       return;
     }
+
     if (board.isEmptyAt(nextRow, column)) {
       moveList.add(new Move(row, column, nextRow, column));
 
@@ -45,7 +50,6 @@ public class Pawn extends Piece {
       if (color == Color.BLACK && row == 6 && board.isEmptyAt(4, column)) {
         moveList.add(new Move(row, column, 4, column));
       }
-
     }
 
     if (column < 7 && board.hasColorAt(nextRow, column + 1, getColor().flip())) {

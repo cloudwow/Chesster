@@ -22,22 +22,13 @@ public class Rook extends Piece {
 
   @Override
   public void addMoves(Board board, int row, int column, List<Move> moveList) {
-    addRow(board, row, column, +1, 0, moveList);
-    addRow(board, row, column, -1, 0, moveList);
-    addRow(board, row, column, 0, +1, moveList);
-    addRow(board, row, column, -0, -1, moveList);
+    addRay(board, row, column, +1, 0, moveList);
+    addRay(board, row, column, -1, 0, moveList);
+    addRay(board, row, column, 0, +1, moveList);
+    addRay(board, row, column, 0, -1, moveList);
   }
-
-  public void addRow(Board board, int row, int column, int rowDelta, int columnDelta, List<Move> moveList) {
-    int toRow = row;
-    int toColumn = column;
-
-    do {
-      toRow += rowDelta;
-      toColumn += columnDelta;
-
-    } while (tryAddMove(board, row, column, toRow, toColumn, moveList));
-
+  public boolean isQueenOrRook() {
+    return true;
   }
 
 }

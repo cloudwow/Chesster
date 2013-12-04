@@ -14,7 +14,9 @@ public class Piece {
   protected final Color color;
   private final String code;
 
-  public Piece(Color color, String code) {
+  public Piece(
+      Color color,
+      String code) {
     this.color = color;
     this.code = code;
   }
@@ -24,14 +26,21 @@ public class Piece {
   }
 
   public String getCode() {
-    return code;
+    return color == Color.BLACK ? code.toUpperCase() : code;
   }
 
-  public int getValueAt(int row, int column) {
+  public int getValueAt(
+      int row,
+      int column) {
     return 1;
   }
 
-  public int getValueAt(int row, int column, int pieceValue, int[] whiteSquareTable, int[] blackSquareTable) {
+  public int getValueAt(
+      int row,
+      int column,
+      int pieceValue,
+      int[] whiteSquareTable,
+      int[] blackSquareTable) {
     if (this.getColor() == Color.WHITE) {
       return whiteSquareTable[row * 8 + column] * pieceValue;
     } else {
@@ -39,11 +48,21 @@ public class Piece {
     }
   }
 
-  public void addMoves(Board board, int row, int column, List<Move> moveList) {
+  public void addMoves(
+      Board board,
+      int row,
+      int column,
+      List<Move> moveList) {
     tryAddMove(board, row, column, row + color.getDirection(), column, moveList);
   }
 
-  protected boolean tryAddMove(Board board, int fromRow, int fromColumn, int toRow, int toColumn, List<Move> moveList) {
+  protected boolean tryAddMove(
+      Board board,
+      int fromRow,
+      int fromColumn,
+      int toRow,
+      int toColumn,
+      List<Move> moveList) {
     if (toRow > 7 || toRow < 0 || toColumn > 7 || toColumn < 0) {
       return false;
     }
@@ -59,8 +78,59 @@ public class Piece {
     return false;
   }
 
+  public void addRay(
+      Board board,
+      int row,
+      int column,
+      int rowDelta,
+      int columnDelta,
+      List<Move> moveList) {
+    int toRow = row;
+    int toColumn = column;
+
+    while (true) {
+      toRow += rowDelta;
+      toColumn += columnDelta;
+      if (toRow > 7 || toRow < 0 || toColumn > 7 || toColumn < 0) {
+        break;
+      }
+      Color targetColor = board.getColorAt(toRow, toColumn);
+
+      if (this.getColor() != targetColor) {
+        moveList.add(new Move(row, column, toRow, toColumn));
+      }
+
+      if (targetColor != null) {
+        break;
+      }
+
+    }
+  }
+
+  public boolean isKing() {
+    return false;
+  }
+
+  public boolean isPawn() {
+    return false;
+  }
+
+  public boolean isQueenOrBishop() {
+    return false;
+  }
+
+  public boolean isQueenOrRook() {
+    return false;
+  }
+
+  public boolean isKnightOf(
+      Color color) {
+    return false;
+  }
+
   @Override
-  public boolean equals(Object obj) {
+  public boolean equals(
+      Object obj) {
     if (obj == null) {
       return false;
     } else if (obj == this) {

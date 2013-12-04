@@ -18,6 +18,14 @@ public class Coordinate {
     return row;
   }
 
+  public Coordinate add(int rowDelta, int columnDelta) {
+    return new Coordinate(row+rowDelta, column+columnDelta);
+  }
+  
+  public boolean isOnBoard() {
+    return  row <= 7 && row >= 0 && column <= 7 && column >= 0;
+  }
+
   @Override
   public boolean equals(Object obj) {
     if (obj == null) {

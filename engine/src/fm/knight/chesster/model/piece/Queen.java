@@ -22,26 +22,21 @@ public class Queen extends Piece {
 
   @Override
   public void addMoves(Board board, int row, int column, List<Move> moveList) {
-    add(board, row, column, +1, +1, moveList);
-    add(board, row, column, +1, -1, moveList);
-    add(board, row, column, -1, +1, moveList);
-    add(board, row, column, -1, -1, moveList);
-    add(board, row, column, +1, 0, moveList);
-    add(board, row, column, -1, 0, moveList);
-    add(board, row, column, 0, +1, moveList);
-    add(board, row, column, -0, -1, moveList);
+    addRay(board, row, column, +1, +1, moveList);
+    addRay(board, row, column, +1, 0, moveList);
+    addRay(board, row, column, +1, -1, moveList);
+    addRay(board, row, column, -1, +1, moveList);
+    addRay(board, row, column, -1, 0, moveList);
+    addRay(board, row, column, -1, -1, moveList);
+    addRay(board, row, column, 0, +1, moveList);
+    addRay(board, row, column, 0, -1, moveList);
+  }
+  public boolean isQueenOrBishop() {
+    return true;
+  }
+  public boolean isQueenOrRook() {
+    return true;
   }
 
-  public void add(Board board, int row, int column, int rowDelta, int columnDelta, List<Move> moveList) {
-    int toRow = row;
-    int toColumn = column;
-
-    do {
-      toRow += rowDelta;
-      toColumn += columnDelta;
-
-    } while (tryAddMove(board, row, column, toRow, toColumn, moveList));
-
-  }
 
 }

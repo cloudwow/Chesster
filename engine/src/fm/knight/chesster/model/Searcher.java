@@ -18,17 +18,17 @@ public class Searcher {
   }
 
   public Searcher(
-      MoveGenerator moveGenerator,
-      BoardScorer boardScorer,
-      int searchDepth) {
+                  MoveGenerator moveGenerator,
+                  BoardScorer boardScorer,
+                  int searchDepth) {
     this.moveGenerator = moveGenerator;
     this.boardScorer = boardScorer;
-    this.searchDepth = searchDepth; 
+    this.searchDepth = searchDepth;
   }
 
   public Move findBestMove(
-      Board board,
-      Color whoseTurn) {
+                           Board board,
+                           Color whoseTurn) {
     MoveWithScore result = findBestMove(board, whoseTurn, 0, searchDepth, Integer.MAX_VALUE);
 
     System.out.println("best move:" + result.move + " has score:" + result.score);
@@ -36,11 +36,11 @@ public class Searcher {
   }
 
   public MoveWithScore findBestMove(
-      Board board,
-      Color whoseTurn,
-      int depth,
-      int maxDepth,
-      int stopIfScoreIsHigherThan) {
+                                    Board board,
+                                    Color whoseTurn,
+                                    int depth,
+                                    int maxDepth,
+                                    int stopIfScoreIsHigherThan) {
     MoveWithScore best = new MoveWithScore();
 
     // System.out.println("depth="+depth+" color="+whoseTurn+" stopIf="+stopIfScoreIsHigherThan );
@@ -52,16 +52,17 @@ public class Searcher {
 
       if (depth == maxDepth) {
         thisScore = boardScorer.calculateScore(board, whoseTurn);
+
       } else {
         MoveWithScore negaBest = findBestMove(board, whoseTurn.flip(), depth + 1, maxDepth
-            ,
-            -best.score);
-        
+                                              ,
+                                              -best.score);
+
         thisScore = -negaBest.score;
       }
 
       board.undo();
-        
+
       if (thisScore > best.score) {
         best.move = move;
         best.score = thisScore;

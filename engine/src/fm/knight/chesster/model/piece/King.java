@@ -16,8 +16,8 @@ public class King extends Piece {
 
   @Override
   public void addMoves(Board board, int row, int column, List<Move> moveList) {
-    for (int toRow = row - 1; toRow < row + 1; toRow++) {
-      for (int toColumn = column - 1; toColumn < column + 1; toColumn++) {
+    for (int toRow = row - 1; toRow <= row + 1; toRow++) {
+      for (int toColumn = column - 1; toColumn <= column + 1; toColumn++) {
         tryAddMove(board, row, column, toRow, toColumn, moveList);
       }
     }
@@ -27,6 +27,10 @@ public class King extends Piece {
   public int getValueAt(int row, int column) {
     return getValueAt(row, column, ScoreTables.KingValue, ScoreTables.whiteKingMiddleGameSquareTable,
         ScoreTables.blackKingMiddleGameSquareTable);
+  }
+
+  public boolean isKing() {
+    return true;
   }
 
 }
