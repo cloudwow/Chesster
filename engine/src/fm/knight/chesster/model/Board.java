@@ -27,11 +27,28 @@ public class Board {
   private Coordinate enPassantAttackCoordinate;
   private Coordinate enPassantTakeCoordinate;
 
-  public Board(
-      String fen) {
-    int row = 0;
+  private boolean blackCanCastleKingSide;
+  private boolean blackCanCastleQueenSide;
+  private boolean whiteCanCastleKingSide;
+  private boolean whiteCanCastleQueenSide;
 
-    for (String rowFen : fen.split("/")) {
+  private Color whoseTurn;
+  private CastlingState castlingState;
+  public Board(
+               String fen) {
+
+    String[] fields = fen.split(" ");
+    String piecesFen=fields[0];
+    String colorFen=fields[1];
+    String castlingFen = fields[2];
+    String enPassantTargetFen = fields[3];
+
+    String halfMoveClockFen = (fields.length>4) ? fields[4] : "0";
+    String fullMoveNumberFen = (fields.length>5) ? fields[5] : "1";
+
+    int row = 7;
+
+    for (String rowFen : piecesFen.split("/")) {
       int column = 0;
 
       for (char c : rowFen.toCharArray()) {
@@ -42,66 +59,71 @@ public class Board {
 
           switch (c) {
           case 'p':
-            piece = new Pawn(Color.WHITE);
+            piece = new Pawn(Color.BLACK);
             break;
 
           case 'P':
-            piece = new Pawn(Color.BLACK);
+            piece = new Pawn(Color.WHITE);
             break;
- 
+
           case 'r':
-            piece = new Rook(Color.WHITE);
+            piece = new Rook(Color.BLACK);
             break;
 
           case 'R':
-            piece = new Rook(Color.BLACK);
+            piece = new Rook(Color.WHITE);
             break;
           case 'b':
-            piece = new Bishop(Color.WHITE);
+            piece = new Bishop(Color.BLACK);
             break;
 
           case 'B':
-            piece = new Bishop(Color.BLACK);
+            piece = new Bishop(Color.WHITE);
             break;
           case 'n':
-            piece = new Knight(Color.WHITE);
+            piece = new Knight(Color.BLACK);
             break;
 
           case 'N':
-            piece = new Knight(Color.BLACK);
+            piece = new Knight(Color.WHITE);
             break;
           case 'q':
-            piece = new Queen(Color.WHITE);
+            piece = new Queen(Color.BLACK);
             break;
 
           case 'Q':
-            piece = new Queen(Color.BLACK);
+            piece = new Queen(Color.WHITE);
             break;
           case 'k':
-            piece = new King(Color.WHITE);
+            piece = new King(Color.BLACK);
+            blackKingCoordinate = new Coordinate(row, column);
             break;
 
           case 'K':
-            piece = new King(Color.BLACK);
+            piece = new King(Color.WHITE);
+            whiteKingCoordinate = new Coordinate(row, column);
             break;
           }
           pieces[row][column] = piece;
           column++;
         }
       }
-      row++;
+      row--;
     }
+    whoseTurn = colorFen.equals("w") ? Color.WHITE : Color.BLACK;
+
+    castlingState = new CastlingState(castlingFen);
   }
 
   public Board() {
-    this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR");
+    this("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     blackKingCoordinate = new Coordinate(7, 4);
     whiteKingCoordinate = new Coordinate(0, 4);
 
   }
 
   public MoveRecord makeMove(
-      Move move) {
+                             Move move) {
 
     final Piece takenPiece;
 
@@ -115,6 +137,29 @@ public class Board {
 
     setPieceAt(move.getToCoordinate(), movingPiece);
     setPieceAt(move.getFromCoordinate(), null);
+    if (movingPiece.isKing()) {
+      if(move.getFromCoordinate().getColumn()-move.getToCoordinate().getColumn()>1) {
+        // kingside castle
+        if (move.getFromCoordinate().getColumn() != 4) {
+          throw new RuntimeException("WTF castling from odd coordinate");
+        }
+        //move the rook
+        setPieceAt(move.getToCoordinate().add(0,-1), getPieceAt(move.getFromCoordinate().getRow(), 7));
+        setPieceAt(move.getFromCoordinate().getRow(), 7, null);
+
+      }
+
+      if(move.getFromCoordinate().getColumn()-move.getToCoordinate().getColumn()<-1) {
+        // queenside castle
+        if (move.getFromCoordinate().getColumn() != 4) {
+          throw new RuntimeException("WTF castling from odd coordinate");
+        }
+        // move the rook
+        setPieceAt(move.getToCoordinate().add(0,1), getPieceAt(move.getFromCoordinate().getRow(), 0));
+        setPieceAt(move.getFromCoordinate().getRow(), 0, null);
+
+      }
+    }
 
     enPassantAttackCoordinate = null;
     enPassantTakeCoordinate = null;
@@ -128,11 +173,20 @@ public class Board {
       }
 
     }
+    CastlingState newCastlingState = castlingState;
+    if(movingPiece.isKing()) {
+      if(movingPiece.getColor()==Color.BLACK) {
+        newCastlingState = castlingState.withoutBlack();
+      } else {
+        newCastlingState = castlingState.withoutWhite();
+      }
+    }
 
     MoveRecord result = new MoveRecord(move, takenPiece, enPassantAttackCoordinate
         ,
-        enPassantTakeCoordinate);
+        enPassantTakeCoordinate, castlingState);
 
+    castlingState = newCastlingState;
     if (movingPiece.isKing()) {
       switch (movingPiece.getColor()) {
       case WHITE:
@@ -145,6 +199,7 @@ public class Board {
       }
     }
     moveStack.push(result);
+    whoseTurn = whoseTurn.flip();
     return result;
   }
 
@@ -154,6 +209,7 @@ public class Board {
 
     enPassantAttackCoordinate = result.getPreviousEnPassantAttackCoordinate();
     enPassantTakeCoordinate = result.getPreviousEnPassantTakeCoordinate();
+    castlingState = result.getPreviousCastlingState();
     Piece movingPiece = getPieceAt(result.getToCoordinate());
 
     setPieceAt(result.getFromCoordinate(), movingPiece);
@@ -174,15 +230,23 @@ public class Board {
         break;
       }
     }
+    whoseTurn = whoseTurn.flip();
     return result;
   }
 
+  public Color getWhoseTurn() {
+    return whoseTurn;
+  }
   public int getMoveDepth() {
     return moveStack.size();
   }
 
+  public CastlingState getCastlingState() {
+    return castlingState;
+  }
+
   public Piece getPieceAt(
-      Coordinate c) {
+                          Coordinate c) {
     if (c.isOnBoard()) {
       return pieces[c.getRow()][c.getColumn()];
     } else {
@@ -191,27 +255,27 @@ public class Board {
   }
 
   public boolean isEmptyAt(
-      int row,
-      int column) {
+                           int row,
+                           int column) {
     return pieces[row][column] == null;
   }
 
   public boolean hasColorAt(
-      int row,
-      int column,
-      Color color) {
+                            int row,
+                            int column,
+                            Color color) {
     return pieces[row][column] != null && pieces[row][column].getColor() == color;
   }
 
   public Color getColorAt(
-      int row,
-      int column) {
+                          int row,
+                          int column) {
     return pieces[row][column] == null ? null : pieces[row][column].getColor();
   }
 
   public Piece getPieceAt(
-      int row,
-      int column) {
+                          int row,
+                          int column) {
     if (row > 7 || row < 0 || column > 7 || column < 0) {
       return null;
     }
@@ -220,16 +284,21 @@ public class Board {
   }
 
   void setPieceAt(
-      Coordinate c,
-      Piece p) {
+                  Coordinate c,
+                  Piece p) {
     pieces[c.getRow()][c.getColumn()] = p;
   }
 
+  void setPieceAt(
+                  int row, int column,
+                  Piece p) {
+    pieces[row][column] = p;
+  }
+
   public boolean isInCheck(
-      Color color) {
+                           Color color) {
 
     final Coordinate kingCoordinate;
-    Color attackerColor = color.flip();
 
     ;
     switch (color) {
@@ -244,23 +313,31 @@ public class Board {
     default:
       throw new RuntimeException("wtf");
     }
+    return isAttackedBy(kingCoordinate, color.flip());
+  }
+  public boolean isAttackedBy(Coordinate coordinate, Color attackerColor) {
+
     if (
-        findDiagonalAttacker(kingCoordinate, 1, 1, attackerColor)
-        || findDiagonalAttacker(kingCoordinate, 1, -1, attackerColor)
-        || findDiagonalAttacker(kingCoordinate, -1, 1, attackerColor)
-        || findDiagonalAttacker(kingCoordinate, -1, -1, attackerColor)
-        || findFileAttacker(kingCoordinate, 1, 0, attackerColor)
-        || findFileAttacker(kingCoordinate, 1, 0, attackerColor)
-        || findFileAttacker(kingCoordinate, 0, 1, attackerColor)
-        || findFileAttacker(kingCoordinate, 0, -1, attackerColor)
-        || hasKnightOf(kingCoordinate.add(1, 2), attackerColor)
-        || hasKnightOf(kingCoordinate.add(1, -2), attackerColor)
-        || hasKnightOf(kingCoordinate.add(-1, 2), attackerColor)
-        || hasKnightOf(kingCoordinate.add(-1, -2), attackerColor)
-        || hasKnightOf(kingCoordinate.add(2, 1), attackerColor)
-        || hasKnightOf(kingCoordinate.add(2, -1), attackerColor)
-        || hasKnightOf(kingCoordinate.add(-2, 1), attackerColor)
-        || hasKnightOf(kingCoordinate.add(-2, -1), attackerColor)) {
+        findDiagonalAttacker(coordinate, 1, 1, attackerColor)
+        || findDiagonalAttacker(coordinate, 1, -1, attackerColor)
+        || findDiagonalAttacker(coordinate, -1, 1, attackerColor)
+        || findDiagonalAttacker(coordinate, -1, -1, attackerColor)
+        || findFileAttacker(coordinate, 1, 0, attackerColor)
+        || findFileAttacker(coordinate, 1, 0, attackerColor)
+        || findFileAttacker(coordinate, 0, 1, attackerColor)
+        || findFileAttacker(coordinate, 0, -1, attackerColor)
+        || hasKnightOf(coordinate.add(1, 2), attackerColor)
+        || hasKnightOf(coordinate.add(1, -2), attackerColor)
+        || hasKnightOf(coordinate.add(-1, 2), attackerColor)
+        || hasKnightOf(coordinate.add(-1, -2), attackerColor)
+        || hasKnightOf(coordinate.add(2, 1), attackerColor)
+        || hasKnightOf(coordinate.add(2, -1), attackerColor)
+        || hasKnightOf(coordinate.add(-2, 1), attackerColor)
+        || hasKnightOf(coordinate.add(-2, -1), attackerColor)
+        || hasPawnOf(coordinate.add(attackerColor.getDirection()*-1, -1), attackerColor)
+        || hasPawnOf(coordinate.add(attackerColor.getDirection()*-1, 1), attackerColor)) {
+
+      //            System.out.println(this.toString() + "\n\n");
 
       return true;
     }
@@ -269,18 +346,25 @@ public class Board {
   }
 
   boolean hasKnightOf(
-      Coordinate coordinate,
-      Color color) {
+                      Coordinate coordinate,
+                      Color color) {
     Piece piece = getPieceAt(coordinate);
 
     return piece != null && piece.isKnightOf(color);
   }
+  boolean hasPawnOf(
+                    Coordinate coordinate,
+                    Color color) {
+    Piece piece = getPieceAt(coordinate);
+
+    return piece != null && piece.isPawnOf(color);
+  }
 
   boolean findDiagonalAttacker(
-      Coordinate attackedCoordinate,
-      int rowDelta,
-      int columnDelta,
-      Color attackerColor) {
+                               Coordinate attackedCoordinate,
+                               int rowDelta,
+                               int columnDelta,
+                               Color attackerColor) {
 
     int attackerRow = attackedCoordinate.getRow();
     int attackerColumn = attackedCoordinate.getColumn();
@@ -300,11 +384,11 @@ public class Board {
         if (attackerPiece.isQueenOrBishop()) {
 
           /*
-           System.out.println(
-           "" + attackedColor + " king at " + attackedCoordinate + " is being attacked by a "
-           + attackerPiece.getClass().getSimpleName() + " at " + attackerRow + "," + attackerColumn);
-           System.out.println(this.toString() + "\n\n");
-           */
+            System.out.println(
+            "" + attackerColor + " king at " + attackedCoordinate + " is being attacked by a "
+            + attackerPiece.getClass().getSimpleName() + " at " + attackerRow + "," + attackerColumn);
+            System.out.println(this.toString() + "\n\n");
+          */
           return true;
         } else {
           return false;
@@ -314,34 +398,32 @@ public class Board {
   }
 
   boolean findFileAttacker(
-      Coordinate attackedCoordinate,
-      int rowDelta,
-      int columnDelta,
-      Color attackerColor) {
+                           Coordinate attackedCoordinate,
+                           int rowDelta,
+                           int columnDelta,
+                           Color attackerColor) {
 
-    int attackerRow = attackedCoordinate.getRow();
-    int attackerColumn = attackedCoordinate.getColumn();
+    Coordinate attackerCoordinate = attackedCoordinate.add(0,0);
 
     while (true) {
-      attackerRow += rowDelta;
-      attackerColumn += columnDelta;
-      if (attackerRow > 7 || attackerRow < 0 || attackerColumn > 7 || attackerColumn < 0) {
+      attackerCoordinate = attackerCoordinate.add(rowDelta, columnDelta);
+
+      if (!attackerCoordinate.isOnBoard()){
         return false;
       }
-      Piece attackerPiece = getPieceAt(attackerRow, attackerColumn);
+      Piece attackerPiece = getPieceAt(attackerCoordinate);
 
       if (attackerPiece != null) {
         if (attackerPiece.getColor() != attackerColor) {
           return false;
         }
         if (attackerPiece.isQueenOrRook()) {
-
           /*
-           System.out.println(
-           "" + attackedColor + " king at " + attackedCoordinate + " is being attacked by a "
-           + attackerPiece.getClass().getSimpleName() + " at " + attackerRow + "," + attackerColumn);
-           System.out.println(this.toString() + "\n\n");
-           */
+            System.out.println(
+            "" + attackerColor.flip() + " king at " + attackedCoordinate + " is being attacked by a "
+            + attackerPiece.getClass().getSimpleName() + " at " + attackerCoordinate.toString());
+            System.out.println(this.toString() + "\n\n");
+          */
           return true;
         } else {
           return false;
@@ -353,7 +435,7 @@ public class Board {
 
   @Override
   public boolean equals(
-      Object obj) {
+                        Object obj) {
     if (obj == null) {
       return false;
     } else if (obj == this) {
@@ -364,7 +446,7 @@ public class Board {
     Board other = (Board) obj;
 
     return Arrays.deepEquals(this.pieces, other.pieces)
-        && Arrays.deepEquals(this.moveStack.toArray(), other.moveStack.toArray());
+      && Arrays.deepEquals(this.moveStack.toArray(), other.moveStack.toArray());
   }
 
   @Override

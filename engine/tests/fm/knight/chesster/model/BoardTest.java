@@ -23,6 +23,23 @@ public class BoardTest {
   @Test
   public void testSmoke() {
     assertEquals(0, target.getMoveDepth());
+    assertEquals(Color.WHITE, target.getWhoseTurn());
+  }
+    
+  @Test
+  public void testSmoke_fen() {
+    target = new Board("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR b KQkq - 0 1");
+    assertEquals(0, target.getMoveDepth());
+    assertEquals(Color.BLACK, target.getWhoseTurn());
+  }
+
+
+    
+  @Test
+  public void testSmoke_fen_kiwipete() {
+    target = new Board("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -");
+    assertEquals(0, target.getMoveDepth());
+    assertEquals(Color.WHITE, target.getWhoseTurn());
   }
 
   @Test
@@ -87,9 +104,9 @@ public class BoardTest {
 
   @Test
   public void testToString() {
-    String expected = "R N B Q K B N R \n" + "P P P P P P P P \n"
-        + ". . . . . . . . \n" + ". . . . . . . . \n" + ". . . . . . . . \n"
-        + ". . . . . . . . \n" + "p p p p p p p p \n" + "r n b q k b n r \n";
+    String expected = "r n b q k b n r \n" + "p p p p p p p p \n"
+      +". . . . . . . . \n" + ". . . . . . . . \n" + ". . . . . . . . \n"
+      + ". . . . . . . . \n"  + "P P P P P P P P \n"+  "R N B Q K B N R \n" ;
 
     assertEquals(expected, target.toString());
   }

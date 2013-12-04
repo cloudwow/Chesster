@@ -6,18 +6,19 @@ import java.util.List;
 
 public class Perft {
   MoveGenerator moveGenerator = new MoveGenerator();
-  public int countLeaves(
+
+  public int countLeaves(Board board,
       int maxDepth) {
-    Board board = new Board();
-    Color whoseTurn = Color.WHITE;
+
+    Color whoseTurn = board.getWhoseTurn();
 
     return countLeaves(board, whoseTurn, maxDepth);
   }
 
   private int countLeaves(
-      Board board,
-      Color whoseTurn,
-      int maxDepth) {
+                          Board board,
+                          Color whoseTurn,
+                          int maxDepth) {
     int result = 0;
     List<Move> moves = moveGenerator.generateMoves(board, whoseTurn);
 

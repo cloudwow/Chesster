@@ -28,6 +28,9 @@ public class Pawn extends Piece {
   public boolean isPawn() {
     return true;
   }
+  public boolean isPawnOf(Color color) {
+    return color == getColor();
+  }
 
   @Override
   public void addMoves(

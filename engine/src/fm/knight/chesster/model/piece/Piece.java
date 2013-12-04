@@ -26,7 +26,7 @@ public class Piece {
   }
 
   public String getCode() {
-    return color == Color.BLACK ? code.toUpperCase() : code;
+    return color == Color.WHITE ? code.toUpperCase() : code;
   }
 
   public int getValueAt(
@@ -124,6 +124,11 @@ public class Piece {
   }
 
   public boolean isKnightOf(
+      Color color) {
+    return false;
+  }
+
+  public boolean isPawnOf(
       Color color) {
     return false;
   }

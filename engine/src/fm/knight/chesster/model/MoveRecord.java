@@ -11,12 +11,15 @@ public class MoveRecord {
   private final Piece takenPiece;
   private final Coordinate previousEnPassantAttackCoordinate;
   private final Coordinate previousEnPassantTakeCoordinate;
+  private final CastlingState previousCastlingState;
 
-  public MoveRecord(Move move, Piece takenPiece, Coordinate previousEnPassantAttackCoordinate, Coordinate previousEnPassantTakeCoordinate) {
+
+  public MoveRecord(Move move, Piece takenPiece, Coordinate previousEnPassantAttackCoordinate, Coordinate previousEnPassantTakeCoordinate, CastlingState previousCastlingState) {
     this.move = move;
     this.takenPiece = takenPiece;
     this.previousEnPassantAttackCoordinate = previousEnPassantAttackCoordinate;
     this.previousEnPassantTakeCoordinate = previousEnPassantTakeCoordinate;
+    this.previousCastlingState = previousCastlingState;
   }
 
   public Move getMove() {
@@ -41,6 +44,10 @@ public class MoveRecord {
 
   public Coordinate getPreviousEnPassantTakeCoordinate() {
     return previousEnPassantTakeCoordinate;
+  }
+
+  public CastlingState getPreviousCastlingState() {
+    return previousCastlingState;
   }
 
   @Override

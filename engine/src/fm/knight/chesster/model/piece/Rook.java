@@ -27,6 +27,7 @@ public class Rook extends Piece {
     addRay(board, row, column, 0, +1, moveList);
     addRay(board, row, column, 0, -1, moveList);
   }
+
   public boolean isQueenOrRook() {
     return true;
   }

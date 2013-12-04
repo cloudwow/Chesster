@@ -20,14 +20,14 @@ public class MoveRecordTest {
 
   @Before
   public void setup() {
-    target = new MoveRecord(MOVE, BLACK_KING, null, null);
+    target = new MoveRecord(MOVE, BLACK_KING, null, null, null);
   }
 
   @Test
   public void testEquals() {
     Move otherMove = new Move(new Coordinate(1, 1), new Coordinate(3, 3));
     Piece otherPiece = new King(Color.BLACK);
-    MoveRecord other = new MoveRecord(otherMove, otherPiece, null,null);
+    MoveRecord other = new MoveRecord(otherMove, otherPiece, null,null,null);
 
     assertEquals(other, target);
   }
@@ -36,7 +36,7 @@ public class MoveRecordTest {
   public void testEquals_not() {
     Move otherMove = new Move(new Coordinate(1, 1), new Coordinate(3, 3));
     Piece otherPiece = new King(Color.WHITE);
-    MoveRecord other = new MoveRecord(otherMove, otherPiece, null, null);
+    MoveRecord other = new MoveRecord(otherMove, otherPiece, null, null, null);
 
     assertFalse(other.equals(target));
   }
